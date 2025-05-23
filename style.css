@@ -1,58 +1,9 @@
-/* Estilos gerais */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background-color: #f5f5f5;
 }
 
-/* Tela de login */
-.login-container {
-  width: 300px;
-  margin: 100px auto;
-  padding: 30px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  text-align: center;
-}
-
-.login-container h2 {
-  margin-bottom: 20px;
-}
-
-.login-container label {
-  display: block;
-  margin-top: 10px;
-  text-align: left;
-}
-
-.login-container input {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-  box-sizing: border-box;
-}
-
-.login-container button {
-  margin-top: 20px;
-  padding: 10px;
-  width: 100%;
-  background-color: #1e1e1e;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-}
-
-.login-container button:hover {
-  background-color: #333;
-}
-
-.error {
-  color: red;
-  margin-top: 10px;
-}
-
-/* Dashboard */
 .sidebar {
   width: 220px;
   height: 100vh;
@@ -88,6 +39,16 @@ body {
   background-color: #444;
 }
 
+.submenu li {
+  background-color: #2a2a2a;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.submenu li:hover {
+  background-color: #3a3a3a;
+}
+
 .main-content {
   margin-left: 220px;
   padding: 20px;
@@ -112,7 +73,6 @@ header h1 {
   font-size: 24px;
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
