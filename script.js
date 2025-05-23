@@ -1,9 +1,6 @@
-// Removidos: products, nextProductId, loadProductsFromLocalStorage, saveProductsToLocalStorage
-// Estes agora serão gerenciados pelo Firebase Firestore
-
 // A constante `db` (firebase.firestore()) é inicializada no dashboard.html, antes deste script.
 
-// Autenticação simples (mantida como está)
+// Autenticação simples
 document.addEventListener('DOMContentLoaded', function () {
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
@@ -41,10 +38,11 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // NOTA: renderProductList() será chamada por showSection('consulta')
-  // ou você pode chamá-la aqui se quiser que a lista apareça na Home, por exemplo.
+  // ou você pode chamá-la aqui se quiser que a lista apareça na Home, por exemplo,
+  // mas como o dashboard começa na Home, não é estritamente necessário.
 });
 
-// Alternar submenu de Produtos (mantida como está)
+// Alternar submenu de Produtos
 function toggleSubmenu() {
   const submenu = document.getElementById('produtos-submenu');
   submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
@@ -90,13 +88,13 @@ async function showSection(sectionId) { // Adicione 'async' aqui
   }
 }
 
-// Logout (mantida como está)
+// Logout
 function logout() {
   alert('Você saiu do sistema.');
   window.location.href = 'index.html';
 }
 
-// Funções para o Modal de Tipo de Produto (mantidas, mas lembre que o tipo não é salvo no BD)
+// Funções para o Modal de Tipo de Produto
 function openProductTypeModal() {
   document.getElementById('product-type-modal').style.display = 'block';
 }
@@ -178,7 +176,7 @@ async function renderProductList() { // Adicione 'async' aqui
   const productListBody = document.getElementById('product-list-body');
   const noProductsMessage = document.getElementById('no-products-message');
 
-  if (!productListBody) return; // Garante que estamos na página correta
+  if (!productListBody) return; // Garante que estamos na página correta (dashboard)
 
   productListBody.innerHTML = ''; // Limpa a tabela antes de renderizar
 
