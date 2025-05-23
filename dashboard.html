@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - Cannapis</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Cannapis</h2>
+    <ul>
+      <li class="active" onclick="showSection('home')">Home</li>
+      <li onclick="showSection('produtos')">Produtos</li>
+      <li onclick="showSection('pedidos')">Pedidos</li>
+      <li onclick="logout()">Sair</li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <header>
+      <h1 id="section-title">Home</h1>
+    </header>
+
+    <div id="home" class="section active">
+      <p>Bem-vindo ao painel administrativo da Cannapis.</p>
+    </div>
+
+    <div id="produtos" class="section">
+      <p>Lista de produtos disponíveis.</p>
+    </div>
+
+    <div id="pedidos" class="section">
+      <p>Histórico de pedidos realizados.</p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
