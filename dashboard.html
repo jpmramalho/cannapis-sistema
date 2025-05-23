@@ -71,7 +71,22 @@
 
     <div id="consulta" class="section">
       <h2>Consulta de Produtos</h2>
-      <p>Lista com busca e filtro de produtos.</p>
+      <div class="product-list-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Nome</th>
+              <th>Descrição</th>
+              <th>Preço</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="product-list-body">
+            </tbody>
+        </table>
+        <p id="no-products-message" style="text-align: center; color: #555; display: none;">Nenhum produto cadastrado ainda.</p>
+      </div>
     </div>
 
     <div id="relatorio" class="section">
