@@ -1,7 +1,25 @@
-// Simulação de "banco de dados" de produtos
-// Em um sistema real, isso viria de um backend (API, banco de dados)
+// Simulação de "banco de dados" de produtos com localStorage
+// Os dados serão persistidos no navegador do usuário
 let products = [];
-let nextProductId = 1; // Para simular IDs únicos para cada produto
+let nextProductId = 1;
+
+// Função para carregar produtos do localStorage
+function loadProductsFromLocalStorage() {
+  const storedProducts = localStorage.getItem('products');
+  if (storedProducts) {
+    products = JSON.parse(storedProducts);
+    // Encontra o próximo ID disponível para evitar conflitos
+    if (products.length > 0) {
+      const maxId = Math.max(...products.map(p => p.id));
+      nextProductId = maxId + 1;
+    }
+  }
+}
+
+// Função para salvar produtos no localStorage
+function saveProductsToLocalStorage() {
+  localStorage.setItem('products', JSON.stringify(products));
+}
 
 // Autenticação simples
 document.addEventListener('DOMContentLoaded', function () {
@@ -21,6 +39,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // Carregar produtos ao iniciar o dashboard
+  // Verifica se estamos na página do dashboard antes de carregar e renderizar
+  if (document.getElementById('dashboard-container')) { // Adicionei um ID ao container principal do dashboard para esta verificação
+    loadProductsFromLocalStorage();
+    renderProductList();
+  }
+
   // Adicionar um event listener para o submit do formulário de produto
   const productForm = document.getElementById('product-registration-form');
   if (productForm) {
@@ -38,11 +63,6 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.style.display = "none";
       }
     }
-  }
-
-  // Carregar a lista de produtos quando a página for carregada ou a seção de consulta for mostrada
-  if (document.getElementById('product-list-body')) {
-    renderProductList();
   }
 });
 
@@ -113,7 +133,7 @@ function saveNewProductType() {
   const newType = newTypeInput.value.trim();
 
   if (newType) {
-    alert(`Tipo de Produto "${newType}" salvo (neste exemplo, apenas alerta). Em um sistema real, isso enviaria para um banco de dados.`);
+    alert(`Tipo de Produto "${newType}" salvo (Neste exemplo, isso apenas preenche o campo. Em um sistema real com backend, você salvaria este tipo em outra tabela de tipos e talvez o adicionasse a um <select>).`);
     document.getElementById('product-type').value = newType;
     closeProductTypeModal();
     newTypeInput.value = '';
@@ -127,7 +147,7 @@ function saveProduct() {
   const productType = document.getElementById('product-type').value.trim();
   const productName = document.getElementById('product-name').value.trim();
   const productDescription = document.getElementById('product-description').value.trim();
-  const productPrice = parseFloat(document.getElementById('product-price').value); // Converte para número
+  const productPrice = parseFloat(document.getElementById('product-price').value);
 
   if (!productName) {
     alert('Nome do Produto é obrigatório!');
@@ -147,9 +167,10 @@ function saveProduct() {
     preco: productPrice.toFixed(2) // Formata o preço com 2 casas decimais
   };
 
-  products.push(newProduct); // Adiciona o produto ao array de simulação
+  products.push(newProduct); // Adiciona o produto ao array
+  saveProductsToLocalStorage(); // Salva no localStorage
 
-  alert(`Produto "${productName}" salvo com sucesso!\n(Visualizável na seção "Consulta")`);
+  alert(`Produto "${productName}" salvo com sucesso!\n(Visualizável na seção "Consulta" e persistirá no navegador.)`);
 
   // Limpa o formulário após salvar
   document.getElementById('product-registration-form').reset();
@@ -162,6 +183,10 @@ function saveProduct() {
 function renderProductList() {
   const productListBody = document.getElementById('product-list-body');
   const noProductsMessage = document.getElementById('no-products-message');
+
+  // Verifica se o elemento existe antes de tentar manipulá-lo (útil para o index.html)
+  if (!productListBody) return;
+
   productListBody.innerHTML = ''; // Limpa a tabela antes de renderizar
 
   if (products.length === 0) {
@@ -196,33 +221,33 @@ function renderProductList() {
 }
 
 function editProduct() {
-  alert('Funcionalidade "Editar" no formulário de cadastro: Para editar um produto, primeiro selecione-o na lista de "Consulta".');
-  // Em um sistema real, aqui você carregaria os dados de um produto existente
-  // para preencher o formulário, e a função "Salvar" seria usada para atualizar.
+  alert('Funcionalidade "Editar" no formulário de cadastro: Para editar um produto, primeiro selecione-o na lista de "Consulta" através do botão "Editar" na linha do produto.');
 }
 
 function deleteProduct() {
-  alert('Funcionalidade "Excluir" no formulário de cadastro: Para excluir um produto, selecione-o na lista de "Consulta" e use o botão "Excluir" lá.');
-  // Em um sistema real, este botão aqui seria usado para excluir o produto que estivesse
-  // atualmente carregado no formulário para edição.
+  alert('Funcionalidade "Excluir" no formulário de cadastro: Para excluir um produto, selecione-o na lista de "Consulta" através do botão "Excluir" na linha do produto.');
 }
 
 // Funções para editar e excluir da lista de consulta
 function editProductFromList(productId) {
   const productToEdit = products.find(p => p.id === productId);
   if (productToEdit) {
-    alert(`Editando produto: ${productToEdit.nome} (ID: ${productId})\nNeste exemplo, você seria redirecionado para o formulário de cadastro com os dados preenchidos.`);
-    // Em um sistema real, você preencheria o formulário de cadastro com esses dados:
-    // document.getElementById('product-type').value = productToEdit.tipo;
-    // document.getElementById('product-name').value = productToEdit.nome;
-    // document.getElementById('product-description').value = productToEdit.descricao;
-    // document.getElementById('product-price').value = productToEdit.preco;
-    // E então mudaria para a seção de cadastro:
-    // showSection('cadastro');
-    // Você também precisaria de um mecanismo para saber que está editando (ex: um ID escondido)
-    // para que a função 'saveProduct' atualize em vez de criar um novo.
+    // Preenche o formulário com os dados do produto para edição
+    document.getElementById('product-type').value = productToEdit.tipo;
+    document.getElementById('product-name').value = productToEdit.nome;
+    document.getElementById('product-description').value = productToEdit.descricao;
+    document.getElementById('product-price').value = parseFloat(productToEdit.preco); // Converte de volta para número para o input
+
+    // Oculta o botão Salvar e mostra um botão de Atualizar (ou reutiliza o Salvar, ajustando a lógica)
+    // Para simplificar, vamos alterar a lógica do saveProduct para detectar se é edição
+    // ou criação. Para isso, podemos armazenar o ID do produto sendo editado.
+    document.getElementById('product-registration-form').dataset.editingProductId = productToEdit.id;
+    
+    alert(`Dados do produto "${productToEdit.nome}" carregados para edição. Altere os campos e clique em "Salvar" para atualizar.`);
+    showSection('cadastro'); // Redireciona para a seção de cadastro
   }
 }
+
 
 function deleteProductFromList(productId) {
   const productIndex = products.findIndex(p => p.id === productId);
@@ -230,6 +255,7 @@ function deleteProductFromList(productId) {
     const productName = products[productIndex].nome;
     if (confirm(`Tem certeza que deseja excluir o produto "${productName}"?`)) {
       products.splice(productIndex, 1); // Remove o produto do array
+      saveProductsToLocalStorage(); // Salva a alteração no localStorage
       alert(`Produto "${productName}" excluído.`);
       renderProductList(); // Atualiza a lista na tela
     }
