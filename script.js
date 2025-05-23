@@ -1,27 +1,9 @@
-// Simulação de "banco de dados" de produtos com localStorage
-// Os dados serão persistidos no navegador do usuário
-let products = [];
-let nextProductId = 1;
+// Removidos: products, nextProductId, loadProductsFromLocalStorage, saveProductsToLocalStorage
+// Estes agora serão gerenciados pelo Firebase Firestore
 
-// Função para carregar produtos do localStorage
-function loadProductsFromLocalStorage() {
-  const storedProducts = localStorage.getItem('products');
-  if (storedProducts) {
-    products = JSON.parse(storedProducts);
-    // Encontra o próximo ID disponível para evitar conflitos
-    if (products.length > 0) {
-      const maxId = Math.max(...products.map(p => p.id));
-      nextProductId = maxId + 1;
-    }
-  }
-}
+// A constante `db` (firebase.firestore()) é inicializada no dashboard.html, antes deste script.
 
-// Função para salvar produtos no localStorage
-function saveProductsToLocalStorage() {
-  localStorage.setItem('products', JSON.stringify(products));
-}
-
-// Autenticação simples
+// Autenticação simples (mantida como está)
 document.addEventListener('DOMContentLoaded', function () {
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
@@ -39,41 +21,37 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Carregar produtos ao iniciar o dashboard
-  // Verifica se estamos na página do dashboard antes de carregar e renderizar
-  if (document.getElementById('dashboard-container')) { // Adicionei um ID ao container principal do dashboard para esta verificação
-    loadProductsFromLocalStorage();
-    renderProductList();
-  }
-
   // Adicionar um event listener para o submit do formulário de produto
   const productForm = document.getElementById('product-registration-form');
   if (productForm) {
     productForm.addEventListener('submit', function(e) {
       e.preventDefault(); // Impede o envio padrão do formulário
-      saveProduct(); // Chama a função de salvar
+      saveProduct(); // Chama a função de salvar/atualizar
     });
   }
 
   // Fechar o modal clicando fora dele
   const modal = document.getElementById('product-type-modal');
-  if (modal) { // Verifica se o modal existe na página (só no dashboard)
+  if (modal) {
     window.onclick = function(event) {
       if (event.target == modal) {
         modal.style.display = "none";
       }
     }
   }
+
+  // NOTA: renderProductList() será chamada por showSection('consulta')
+  // ou você pode chamá-la aqui se quiser que a lista apareça na Home, por exemplo.
 });
 
-// Alternar submenu de Produtos
+// Alternar submenu de Produtos (mantida como está)
 function toggleSubmenu() {
   const submenu = document.getElementById('produtos-submenu');
   submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
 }
 
 // Mostrar seção selecionada
-function showSection(sectionId) {
+async function showSection(sectionId) { // Adicione 'async' aqui
   // Atualiza título
   document.getElementById('section-title').textContent =
     sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
@@ -92,7 +70,6 @@ function showSection(sectionId) {
 
   // Marca 'Home', 'Pedidos' ou 'Sair' como ativo se aplicável
   const item = Array.from(menuItems).find((el) => {
-      // Verifica o texto do item ou o texto dentro de um submenu
       if (el.textContent.toLowerCase() === sectionId) return true;
       const submenuItems = el.querySelectorAll('ul li');
       return Array.from(submenuItems).some(subItem => subItem.textContent.toLowerCase() === sectionId);
@@ -107,19 +84,19 @@ function showSection(sectionId) {
     }
   }
 
-  // Se a seção de consulta for mostrada, renderiza a lista de produtos
+  // Se a seção de consulta for mostrada, renderiza a lista de produtos do Firebase
   if (sectionId === 'consulta') {
-    renderProductList();
+    await renderProductList(); // Chame renderProductList como assíncrona
   }
 }
 
-// Logout
+// Logout (mantida como está)
 function logout() {
   alert('Você saiu do sistema.');
   window.location.href = 'index.html';
 }
 
-// Funções para o Modal de Tipo de Produto
+// Funções para o Modal de Tipo de Produto (mantidas, mas lembre que o tipo não é salvo no BD)
 function openProductTypeModal() {
   document.getElementById('product-type-modal').style.display = 'block';
 }
@@ -133,7 +110,7 @@ function saveNewProductType() {
   const newType = newTypeInput.value.trim();
 
   if (newType) {
-    alert(`Tipo de Produto "${newType}" salvo (Neste exemplo, isso apenas preenche o campo. Em um sistema real com backend, você salvaria este tipo em outra tabela de tipos e talvez o adicionasse a um <select>).`);
+    alert(`Tipo de Produto "${newType}" salvo (Neste exemplo, isso apenas preenche o campo. Para persistir tipos, você precisaria de uma coleção separada no Firestore para tipos).`);
     document.getElementById('product-type').value = newType;
     closeProductTypeModal();
     newTypeInput.value = '';
@@ -142,8 +119,8 @@ function saveNewProductType() {
   }
 }
 
-// Funções para os botões do formulário de produto
-function saveProduct() {
+// Funções para os botões do formulário de produto (AGORA INTERAGEM COM FIRESTORE)
+async function saveProduct() { // Adicione 'async' aqui
   const productType = document.getElementById('product-type').value.trim();
   const productName = document.getElementById('product-name').value.trim();
   const productDescription = document.getElementById('product-description').value.trim();
@@ -158,106 +135,135 @@ function saveProduct() {
       return;
   }
 
-  // Cria um novo objeto produto
-  const newProduct = {
-    id: nextProductId++, // Atribui um ID único
-    tipo: productType,
-    nome: productName,
-    descricao: productDescription,
-    preco: productPrice.toFixed(2) // Formata o preço com 2 casas decimais
-  };
+  const form = document.getElementById('product-registration-form');
+  const editingProductId = form.dataset.editingProductId;
 
-  products.push(newProduct); // Adiciona o produto ao array
-  saveProductsToLocalStorage(); // Salva no localStorage
+  try {
+    if (editingProductId) {
+      // Lógica para EDIÇÃO
+      const productRef = db.collection('products').doc(editingProductId);
+      await productRef.update({
+        tipo: productType,
+        nome: productName,
+        descricao: productDescription,
+        preco: productPrice.toFixed(2)
+      });
+      alert(`Produto "${productName}" atualizado com sucesso no Firebase!`);
+      delete form.dataset.editingProductId; // Remove o ID de edição
+    } else {
+      // Lógica para NOVO CADASTRO
+      await db.collection('products').add({
+        tipo: productType,
+        nome: productName,
+        descricao: productDescription,
+        preco: productPrice.toFixed(2),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp() // Opcional: timestamp de criação
+      });
+      alert(`Produto "${productName}" salvo com sucesso no Firebase!`);
+    }
 
-  alert(`Produto "${productName}" salvo com sucesso!\n(Visualizável na seção "Consulta" e persistirá no navegador.)`);
+    // Limpa o formulário após salvar/atualizar
+    form.reset();
+    document.getElementById('product-type').value = '';
 
-  // Limpa o formulário após salvar
-  document.getElementById('product-registration-form').reset();
-  document.getElementById('product-type').value = ''; // Campo readonly precisa ser limpo separadamente
-
-  renderProductList(); // Atualiza a lista de produtos na seção de consulta
+    await renderProductList(); // Atualiza a lista na tela após a operação no DB
+  } catch (error) {
+    console.error("Erro ao salvar/atualizar produto: ", error);
+    alert("Ocorreu um erro ao salvar/atualizar o produto. Verifique o console para mais detalhes.");
+  }
 }
 
-// Renderiza a lista de produtos na tabela
-function renderProductList() {
+// Renderiza a lista de produtos na tabela (AGORA BUSCA DO FIRESTORE)
+async function renderProductList() { // Adicione 'async' aqui
   const productListBody = document.getElementById('product-list-body');
   const noProductsMessage = document.getElementById('no-products-message');
 
-  // Verifica se o elemento existe antes de tentar manipulá-lo (útil para o index.html)
-  if (!productListBody) return;
+  if (!productListBody) return; // Garante que estamos na página correta
 
   productListBody.innerHTML = ''; // Limpa a tabela antes de renderizar
 
-  if (products.length === 0) {
-    noProductsMessage.style.display = 'block'; // Mostra a mensagem
-    return;
-  } else {
-    noProductsMessage.style.display = 'none'; // Esconde a mensagem
+  try {
+    const productsCollection = await db.collection('products').orderBy('createdAt', 'desc').get(); // Busca ordenada
+    const products = productsCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    if (products.length === 0) {
+      noProductsMessage.style.display = 'block';
+      return;
+    } else {
+      noProductsMessage.style.display = 'none';
+    }
+
+    products.forEach(product => {
+      const row = productListBody.insertRow();
+      row.insertCell().textContent = product.tipo || 'N/A';
+      row.insertCell().textContent = product.nome;
+      row.insertCell().textContent = product.descricao || 'Sem descrição';
+      row.insertCell().textContent = `R$ ${String(product.preco).replace('.', ',')}`; // Garante que é string antes de replace
+
+      const actionsCell = row.insertCell();
+      actionsCell.classList.add('action-buttons');
+
+      const editButton = document.createElement('button');
+      editButton.textContent = 'Editar';
+      editButton.classList.add('edit-btn');
+      editButton.onclick = () => editProductFromList(product.id);
+      actionsCell.appendChild(editButton);
+
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Excluir';
+      deleteButton.classList.add('delete-btn');
+      deleteButton.onclick = () => deleteProductFromList(product.id);
+      actionsCell.appendChild(deleteButton);
+    });
+  } catch (error) {
+    console.error("Erro ao buscar produtos do Firebase: ", error);
+    alert("Ocorreu um erro ao carregar os produtos. Verifique o console para mais detalhes.");
   }
-
-  products.forEach(product => {
-    const row = productListBody.insertRow();
-    row.insertCell().textContent = product.tipo || 'N/A'; // N/A se não houver tipo
-    row.insertCell().textContent = product.nome;
-    row.insertCell().textContent = product.descricao || 'Sem descrição';
-    row.insertCell().textContent = `R$ ${product.preco.replace('.', ',')}`; // Formato BR
-
-    const actionsCell = row.insertCell();
-    actionsCell.classList.add('action-buttons');
-
-    const editButton = document.createElement('button');
-    editButton.textContent = 'Editar';
-    editButton.classList.add('edit-btn');
-    editButton.onclick = () => editProductFromList(product.id);
-    actionsCell.appendChild(editButton);
-
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Excluir';
-    deleteButton.classList.add('delete-btn');
-    deleteButton.onclick = () => deleteProductFromList(product.id);
-    actionsCell.appendChild(deleteButton);
-  });
 }
 
+// Funções para editar e excluir da lista de consulta (AGORA INTERAGEM COM FIRESTORE)
+async function editProductFromList(productId) { // Adicione 'async' aqui
+  try {
+    const productDoc = await db.collection('products').doc(productId).get();
+    if (productDoc.exists) {
+      const productToEdit = { id: productDoc.id, ...productDoc.data() };
+      
+      document.getElementById('product-type').value = productToEdit.tipo || '';
+      document.getElementById('product-name').value = productToEdit.nome || '';
+      document.getElementById('product-description').value = productToEdit.descricao || '';
+      document.getElementById('product-price').value = parseFloat(productToEdit.preco); // Converte de volta para número
+
+      document.getElementById('product-registration-form').dataset.editingProductId = productToEdit.id;
+      
+      alert(`Dados do produto "${productToEdit.nome}" carregados para edição. Altere os campos e clique em "Salvar" para atualizar.`);
+      showSection('cadastro'); // Redireciona para a seção de cadastro
+    } else {
+      alert("Produto não encontrado para edição.");
+    }
+  } catch (error) {
+    console.error("Erro ao carregar produto para edição: ", error);
+    alert("Ocorreu um erro ao carregar o produto para edição. Verifique o console para mais detalhes.");
+  }
+}
+
+async function deleteProductFromList(productId) { // Adicione 'async' aqui
+  if (confirm('Tem certeza que deseja excluir este produto do Firebase?')) {
+    try {
+      await db.collection('products').doc(productId).delete();
+      alert('Produto excluído com sucesso do Firebase.');
+      await renderProductList(); // Atualiza a lista após a exclusão
+    } catch (error) {
+      console.error("Erro ao excluir produto: ", error);
+      alert("Ocorreu um erro ao excluir o produto. Verifique o console para mais detalhes.");
+    }
+  }
+}
+
+// Funções que eram placeholders no formulário, agora só alertam para usar a lista
 function editProduct() {
   alert('Funcionalidade "Editar" no formulário de cadastro: Para editar um produto, primeiro selecione-o na lista de "Consulta" através do botão "Editar" na linha do produto.');
 }
 
 function deleteProduct() {
   alert('Funcionalidade "Excluir" no formulário de cadastro: Para excluir um produto, selecione-o na lista de "Consulta" através do botão "Excluir" na linha do produto.');
-}
-
-// Funções para editar e excluir da lista de consulta
-function editProductFromList(productId) {
-  const productToEdit = products.find(p => p.id === productId);
-  if (productToEdit) {
-    // Preenche o formulário com os dados do produto para edição
-    document.getElementById('product-type').value = productToEdit.tipo;
-    document.getElementById('product-name').value = productToEdit.nome;
-    document.getElementById('product-description').value = productToEdit.descricao;
-    document.getElementById('product-price').value = parseFloat(productToEdit.preco); // Converte de volta para número para o input
-
-    // Oculta o botão Salvar e mostra um botão de Atualizar (ou reutiliza o Salvar, ajustando a lógica)
-    // Para simplificar, vamos alterar a lógica do saveProduct para detectar se é edição
-    // ou criação. Para isso, podemos armazenar o ID do produto sendo editado.
-    document.getElementById('product-registration-form').dataset.editingProductId = productToEdit.id;
-    
-    alert(`Dados do produto "${productToEdit.nome}" carregados para edição. Altere os campos e clique em "Salvar" para atualizar.`);
-    showSection('cadastro'); // Redireciona para a seção de cadastro
-  }
-}
-
-
-function deleteProductFromList(productId) {
-  const productIndex = products.findIndex(p => p.id === productId);
-  if (productIndex > -1) {
-    const productName = products[productIndex].nome;
-    if (confirm(`Tem certeza que deseja excluir o produto "${productName}"?`)) {
-      products.splice(productIndex, 1); // Remove o produto do array
-      saveProductsToLocalStorage(); // Salva a alteração no localStorage
-      alert(`Produto "${productName}" excluído.`);
-      renderProductList(); // Atualiza a lista na tela
-    }
-  }
 }
