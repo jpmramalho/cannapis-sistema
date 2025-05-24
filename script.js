@@ -45,33 +45,36 @@ document.addEventListener('DOMContentLoaded', async function () {
       if (target && target.dataset.target) {
         e.preventDefault();
         const targetSectionId = target.dataset.target;
-        showSection(targetSectionId);
 
         // Remove a classe 'active' de todos os itens do menu
         document.querySelectorAll('.list-group-item').forEach(item => {
           item.classList.remove('active');
         });
+
         // Adiciona a classe 'active' ao item clicado (se não for um item pai de colapso)
-        if (!target.dataset.bsToggle) { // Garante que não adiciona 'active' ao item 'Produtos'
+        if (!target.dataset.bsToggle) { // Garante que não adiciona 'active' ao item pai (Produtos, Associados)
           target.classList.add('active');
-        } else { // Se for um item pai (como Produtos), ativar o subitem correspondente
-          // Isso é mais complexo se precisar ativar o pai e o filho, mas para o caso,
-          // o importante é que o filho tenha a classe 'active' quando clicado.
-          // Se quiser o item pai também ativo, precisaria de lógica extra.
         }
 
+        showSection(targetSectionId); // Mostra a seção
 
         // Ações específicas ao abrir certas seções
         if (targetSectionId === 'cadastro-produtos') {
           await loadProductTypes();
           await loadSuppliers();
-        } else if (targetSectionId === 'listar-produtos') { // Agora também para consulta de produtos
+        } else if (targetSectionId === 'listar-produtos') {
           await loadProductsToList();
         } else if (targetSectionId === 'cadastro-associados') {
           await loadAssociateTypes();
-        } else if (targetSectionId === 'listar-associados') {
-          await loadAssociatesToList();
+        } else if (targetSectionId === 'em-admissao') {
+          // Lógica para carregar associados "Em Admissão"
+          await loadAssociatesFilteredToList('Em Admissão', 'associates-em-admissao-table-body');
+        } else if (targetSectionId === 'admitidos') {
+          // Lógica para carregar associados "Admitidos" (Ativos)
+          await loadAssociatesFilteredToList('ativo', 'associates-admitidos-table-body');
         }
+        // Removed a antiga chamada para loadAssociatesToList() na seção 'listar-associados'
+        // pois ela foi substituída pelos novos submenus
       }
     });
 
@@ -88,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       }
     });
 
-    // Event listeners para os botões e formulários
+    // Event listeners para os botões e formulários (sem alterações aqui)
     const newProductBtn = document.getElementById('new-product-btn');
     if (newProductBtn) {
       newProductBtn.addEventListener('click', openNewProductTypeModal);
@@ -157,7 +160,7 @@ function showSection(sectionId) {
   }
 }
 
-// Funções para Tipos de Produto
+// Funções para Tipos de Produto (sem alterações)
 async function loadProductTypes() {
   const productTypeSelect = document.getElementById('product-type');
   if (!productTypeSelect) return;
@@ -215,7 +218,7 @@ async function saveNewProductTypeToFirestore() {
   }
 }
 
-// Funções para Fornecedores
+// Funções para Fornecedores (sem alterações)
 async function loadSuppliers() {
   const supplierSelect = document.getElementById('supplier');
   if (!supplierSelect) return;
@@ -273,7 +276,7 @@ async function saveNewSupplierToFirestore() {
   }
 }
 
-// Funções para Tipos de Associado
+// Funções para Tipos de Associado (sem alterações)
 async function loadAssociateTypes() {
   const associateTypeSelect = document.getElementById('associate-type');
   if (!associateTypeSelect) return;
@@ -331,7 +334,7 @@ async function saveNewAssociateTypeToFirestore() {
   }
 }
 
-// Funções para Cadastro de Produtos
+// Funções para Cadastro de Produtos (sem alterações)
 async function handleProductFormSubmit(event) {
   event.preventDefault();
 
@@ -400,7 +403,7 @@ async function handleProductFormSubmit(event) {
   }
 }
 
-// Funções para atributos dinâmicos
+// Funções para atributos dinâmicos (sem alterações)
 function addAttributeField() {
   const container = document.getElementById('dynamic-attributes-container');
   const attributeGroup = document.createElement('div');
@@ -423,7 +426,7 @@ function removeAttributeField(button) {
   button.closest('.attribute-group').remove();
 }
 
-// Funções para listar produtos
+// Funções para listar produtos (sem alterações)
 async function loadProductsToList() {
   const productsTableBody = document.getElementById('products-table-body');
   productsTableBody.innerHTML = ''; // Limpa a tabela
@@ -454,7 +457,7 @@ async function loadProductsToList() {
   }
 }
 
-// Funções de edição e exclusão de produtos
+// Funções de edição e exclusão de produtos (sem alterações)
 async function editProduct(productId) {
   try {
     const doc = await db.collection('products').doc(productId).get();
@@ -520,7 +523,7 @@ async function deleteProduct(productId) {
   }
 }
 
-// Geração de PDF de Produtos
+// Geração de PDF de Produtos (sem alterações)
 async function generateProductsPdf() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -581,7 +584,7 @@ async function generateProductsPdf() {
   }
 }
 
-// Funções para cadastro de associados
+// Funções para cadastro de associados (sem alterações no formulário em si)
 async function handleAssociateFormSubmit(event) {
   event.preventDefault();
 
@@ -615,22 +618,44 @@ async function handleAssociateFormSubmit(event) {
       alert('Associado cadastrado com sucesso!');
     }
     associateForm.reset();
-    showSection('listar-associados'); // Redireciona para a lista
-    await loadAssociatesToList(); // Recarrega a lista
+    // Após salvar, verificar para qual lista o associado vai e recarregar
+    if (associateData.statusAssociado.toLowerCase() === 'ativo') {
+      showSection('admitidos');
+      await loadAssociatesFilteredToList('ativo', 'associates-admitidos-table-body');
+    } else if (associateData.statusAssociado.toLowerCase() === 'em admissão') { // Supondo que você use 'Em Admissão' como status
+      showSection('em-admissao');
+      await loadAssociatesFilteredToList('Em Admissão', 'associates-em-admissao-table-body');
+    } else { // Se for outro status, recarrega a lista de admitidos por padrão ou ajusta conforme sua lógica
+      showSection('admitidos');
+      await loadAssociatesFilteredToList('ativo', 'associates-admitidos-table-body');
+    }
   } catch (error) {
     console.error("Erro ao salvar associado: ", error);
     alert("Ocorreu um erro ao salvar o associado.");
   }
 }
 
-
-// Funções para listar associados
-async function loadAssociatesToList() {
-  const associatesTableBody = document.getElementById('associates-table-body');
+// Funções para listar associados (AGORA COM FILTRO)
+async function loadAssociatesFilteredToList(statusFilter = null, tableBodyId = 'associates-admitidos-table-body') {
+  const associatesTableBody = document.getElementById(tableBodyId);
+  if (!associatesTableBody) {
+    console.error(`Tabela com ID ${tableBodyId} não encontrada.`);
+    return;
+  }
   associatesTableBody.innerHTML = ''; // Limpa a tabela
 
   try {
-    const associatesSnapshot = await db.collection('associates').get();
+    let query = db.collection('associates');
+    if (statusFilter) {
+      query = query.where('statusAssociado', '==', statusFilter);
+    }
+
+    const associatesSnapshot = await query.get();
+    if (associatesSnapshot.empty) {
+      associatesTableBody.innerHTML = `<tr><td colspan="6" class="text-center">Nenhum associado com status "${statusFilter || 'qualquer'}" encontrado.</td></tr>`;
+      return;
+    }
+
     associatesSnapshot.forEach(doc => {
       const associate = doc.data();
       const row = associatesTableBody.insertRow();
@@ -653,7 +678,8 @@ async function loadAssociatesToList() {
   }
 }
 
-// Funções de edição e exclusão de associados
+
+// Funções de edição e exclusão de associados (mantidas, mas a navegação após edição precisa ser pensada)
 async function editAssociate(associateId) {
   try {
     const doc = await db.collection('associates').doc(associateId).get();
@@ -692,7 +718,9 @@ async function deleteAssociate(associateId) {
     try {
       await db.collection('associates').doc(associateId).delete();
       alert('Associado excluído com sucesso!');
-      await loadAssociatesToList(); // Recarrega a lista
+      // Após a exclusão, recarrega a lista de associados admitidos
+      await loadAssociatesFilteredToList('ativo', 'associates-admitidos-table-body');
+      showSection('admitidos'); // Redireciona para a lista de admitidos
     } catch (error) {
       console.error("Erro ao excluir associado: ", error);
       alert("Ocorreu um erro ao excluir o associado.");
@@ -700,7 +728,7 @@ async function deleteAssociate(associateId) {
   }
 }
 
-// Geração de PDF de Associados
+// Geração de PDF de Associados (sem alterações, mas pode ser adaptada para filtros futuros)
 async function generateAssociatesPdf() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -710,7 +738,7 @@ async function generateAssociatesPdf() {
 
   const associates = [];
   try {
-    const associatesSnapshot = await db.collection('associates').get();
+    const associatesSnapshot = await db.collection('associates').get(); // Pega todos para o PDF
     associatesSnapshot.forEach(doc => {
       associates.push(doc.data());
     });

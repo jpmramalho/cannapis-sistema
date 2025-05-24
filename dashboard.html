@@ -26,8 +26,15 @@
           <a href="#" class="list-group-item list-group-item-action bg-dark text-white ps-5" data-target="cadastro-produtos"><i class="fas fa-plus me-2"></i>Cadastro de Produtos</a>
           <a href="#" class="list-group-item list-group-item-action bg-dark text-white ps-5" data-target="listar-produtos"><i class="fas fa-search me-2"></i>Consulta de Produtos</a>
         </div>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white" data-target="cadastro-associados"><i class="fas fa-users me-2"></i>Cadastro de Associados</a>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white" data-target="listar-associados"><i class="fas fa-user-friends me-2"></i>Listar Associados</a>
+        <a href="#associatesSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action bg-dark text-white d-flex justify-content-between align-items-center">
+          <div><i class="fas fa-users me-2"></i>Associados</div>
+          <i class="fas fa-chevron-down ms-auto arrow-icon"></i>
+        </a>
+        <div class="collapse" id="associatesSubmenu">
+          <a href="#" class="list-group-item list-group-item-action bg-dark text-white ps-5" data-target="cadastro-associados"><i class="fas fa-user-plus me-2"></i>Cadastro</a>
+          <a href="#" class="list-group-item list-group-item-action bg-dark text-white ps-5" data-target="em-admissao"><i class="fas fa-hourglass-half me-2"></i>Em Admissão</a>
+          <a href="#" class="list-group-item list-group-item-action bg-dark text-white ps-5" data-target="admitidos"><i class="fas fa-user-check me-2"></i>Admitidos</a>
+        </div>
         <a href="#" class="list-group-item list-group-item-action bg-dark text-white" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
       </div>
     </div>
@@ -254,10 +261,10 @@
           </div>
         </div>
 
-        <div id="listar-associados" class="content-section" style="display: none;">
-          <h3 class="mb-4 text-dark">Listar Associados</h3>
+        <div id="em-admissao" class="content-section" style="display: none;">
+          <h3 class="mb-4 text-dark">Associados em Admissão</h3>
           <div class="card p-4 shadow-sm bg-white">
-            <button class="btn btn-dark mb-3" id="generate-associates-pdf-btn">Gerar PDF de Associados</button>
+            <p class="text-muted">Lista de associados com status "Em Admissão".</p>
             <div class="table-responsive">
               <table class="table table-striped table-hover">
                 <thead>
@@ -270,12 +277,36 @@
                     <th>Ações</th>
                   </tr>
                 </thead>
-                <tbody id="associates-table-body">
+                <tbody id="associates-em-admissao-table-body">
                   </tbody>
               </table>
             </div>
           </div>
         </div>
+
+        <div id="admitidos" class="content-section" style="display: none;">
+          <h3 class="mb-4 text-dark">Associados Admitidos</h3>
+          <div class="card p-4 shadow-sm bg-white">
+            <p class="text-muted">Lista de associados com status "Admitido" (Ativo).</p>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Nome Completo</th>
+                    <th>CPF</th>
+                    <th>Telefone</th>
+                    <th>Tipo de Associado</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="associates-admitidos-table-body">
+                  </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
 
         <div class="modal fade" id="new-product-type-modal" tabindex="-1" aria-labelledby="newProductTypeModalLabel" aria-hidden="true">
           <div class="modal-dialog">
