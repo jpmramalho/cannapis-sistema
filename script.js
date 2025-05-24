@@ -66,6 +66,12 @@ document.addEventListener('DOMContentLoaded', async function () {
           await loadProductsToList();
         } else if (targetSectionId === 'cadastro-associados') {
           await loadAssociateTypes();
+          // Limpa o formulário quando entra na tela de cadastro para um novo registro
+          const associateForm = document.getElementById('associate-form');
+          if (associateForm) {
+            associateForm.reset();
+            delete associateForm.dataset.associateId; // Remove ID de edição
+          }
         } else if (targetSectionId === 'em-admissao') {
           // Lógica para carregar associados "Em Admissão"
           await loadAssociatesFilteredToList('Em Admissão', 'associates-em-admissao-table-body');
@@ -73,8 +79,6 @@ document.addEventListener('DOMContentLoaded', async function () {
           // Lógica para carregar associados "Admitidos" (Ativos)
           await loadAssociatesFilteredToList('ativo', 'associates-admitidos-table-body');
         }
-        // Removed a antiga chamada para loadAssociatesToList() na seção 'listar-associados'
-        // pois ela foi substituída pelos novos submenus
       }
     });
 
@@ -91,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       }
     });
 
-    // Event listeners para os botões e formulários (sem alterações aqui)
+    // Event listeners para os botões e formulários
     const newProductBtn = document.getElementById('new-product-btn');
     if (newProductBtn) {
       newProductBtn.addEventListener('click', openNewProductTypeModal);
@@ -136,11 +140,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (saveNewSupplierBtn) {
       saveNewSupplierBtn.addEventListener('click', saveNewSupplierToFirestore);
     }
-
-    const generateAssociatesPdfBtn = document.getElementById('generate-associates-pdf-btn');
-    if (generateAssociatesPdfBtn) {
-      generateAssociatesPdf.addEventListener('click', generateAssociatesPdf);
-    }
   }
 });
 
@@ -160,7 +159,7 @@ function showSection(sectionId) {
   }
 }
 
-// Funções para Tipos de Produto (sem alterações)
+// Funções para Tipos de Produto
 async function loadProductTypes() {
   const productTypeSelect = document.getElementById('product-type');
   if (!productTypeSelect) return;
@@ -218,7 +217,7 @@ async function saveNewProductTypeToFirestore() {
   }
 }
 
-// Funções para Fornecedores (sem alterações)
+// Funções para Fornecedores
 async function loadSuppliers() {
   const supplierSelect = document.getElementById('supplier');
   if (!supplierSelect) return;
@@ -276,7 +275,7 @@ async function saveNewSupplierToFirestore() {
   }
 }
 
-// Funções para Tipos de Associado (sem alterações)
+// Funções para Tipos de Associado
 async function loadAssociateTypes() {
   const associateTypeSelect = document.getElementById('associate-type');
   if (!associateTypeSelect) return;
@@ -334,7 +333,7 @@ async function saveNewAssociateTypeToFirestore() {
   }
 }
 
-// Funções para Cadastro de Produtos (sem alterações)
+// Funções para Cadastro de Produtos
 async function handleProductFormSubmit(event) {
   event.preventDefault();
 
@@ -350,7 +349,6 @@ async function handleProductFormSubmit(event) {
     online: productForm.querySelector('#product-online').checked,
     restrito: productForm.querySelector('#product-restricted').checked,
     // Imagem será tratada separadamente
-    dataCadastro: firebase.firestore.FieldValue.serverTimestamp(),
     fornecedor: productForm.querySelector('#supplier').value,
   };
 
@@ -375,6 +373,7 @@ async function handleProductFormSubmit(event) {
       alert('Produto atualizado com sucesso!');
     } else {
       // Adicionar novo produto
+      productData.dataCadastro = firebase.firestore.FieldValue.serverTimestamp(); // Adiciona data de cadastro para novos
       const docRef = await db.collection('products').add(productData);
       alert('Produto cadastrado com sucesso!');
 
@@ -403,7 +402,7 @@ async function handleProductFormSubmit(event) {
   }
 }
 
-// Funções para atributos dinâmicos (sem alterações)
+// Funções para atributos dinâmicos
 function addAttributeField() {
   const container = document.getElementById('dynamic-attributes-container');
   const attributeGroup = document.createElement('div');
@@ -426,7 +425,7 @@ function removeAttributeField(button) {
   button.closest('.attribute-group').remove();
 }
 
-// Funções para listar produtos (sem alterações)
+// Funções para listar produtos
 async function loadProductsToList() {
   const productsTableBody = document.getElementById('products-table-body');
   productsTableBody.innerHTML = ''; // Limpa a tabela
@@ -457,7 +456,7 @@ async function loadProductsToList() {
   }
 }
 
-// Funções de edição e exclusão de produtos (sem alterações)
+// Funções de edição e exclusão de produtos
 async function editProduct(productId) {
   try {
     const doc = await db.collection('products').doc(productId).get();
@@ -523,7 +522,7 @@ async function deleteProduct(productId) {
   }
 }
 
-// Geração de PDF de Produtos (sem alterações)
+// Geração de PDF de Produtos
 async function generateProductsPdf() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -538,7 +537,7 @@ async function generateProductsPdf() {
       products.push(doc.data());
     });
 
-    const tableColumn = ["#", "Tipo", "Nome", "Descrição Resumida", "Status", "Online", "Restrito", "Fornecedor"]; // Adicione as novas colunas
+    const tableColumn = ["#", "Tipo", "Nome", "Descrição Resumida", "Status", "Online", "Restrito", "Fornecedor"];
     const tableRows = [];
 
     products.forEach((product, index) => {
@@ -559,19 +558,18 @@ async function generateProductsPdf() {
       head: [tableColumn],
       body: tableRows,
       startY: 20,
-      headStyles: { fillColor: [50, 50, 50] }, // Tons de cinza escuro
+      headStyles: { fillColor: [50, 50, 50] },
       styles: {
         fontSize: 8,
         cellPadding: 3,
-        textColor: [0, 0, 0] // Preto para o texto da tabela
+        textColor: [0, 0, 0]
       },
       alternateRowStyles: {
-        fillColor: [240, 240, 240] // Cinza claro para linhas alternadas
+        fillColor: [240, 240, 240]
       },
       margin: { top: 10, left: 10, right: 10, bottom: 10 },
       didDrawPage: function (data) {
         let str = "Página " + doc.internal.getNumberOfPages();
-        // rodapé
         doc.setFontSize(10);
         doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
       }
@@ -584,7 +582,7 @@ async function generateProductsPdf() {
   }
 }
 
-// Funções para cadastro de associados (sem alterações no formulário em si)
+// Funções para cadastro de associados (atualizadas com os novos campos)
 async function handleAssociateFormSubmit(event) {
   event.preventDefault();
 
@@ -604,31 +602,41 @@ async function handleAssociateFormSubmit(event) {
     tipoAssociado: associateForm.querySelector('#associate-type').value,
     dataAssociacao: associateForm.querySelector('#associate-association-date').value,
     statusAssociado: associateForm.querySelector('input[name="associate-status"]:checked').value,
-    dataCadastro: firebase.firestore.FieldValue.serverTimestamp()
+    // Novos campos
+    condicoesMedicas: associateForm.querySelector('#associate-medical-conditions').value.trim(),
+    recebeTratamentoMedico: associateForm.querySelector('#associate-medical-treatment').checked,
+    experienciaCultivo: associateForm.querySelector('#associate-cultivation-experience').value.trim(),
+    metodologiaCultivo: associateForm.querySelector('#associate-cultivation-method').value.trim(),
+    observacoesAdicionais: associateForm.querySelector('#associate-observations').value.trim(),
   };
 
   try {
     if (associateId) {
-      // Atualizar associado existente
+      // Atualizar associado existente (não atualiza dataCadastro)
       await db.collection('associates').doc(associateId).update(associateData);
       alert('Associado atualizado com sucesso!');
     } else {
       // Adicionar novo associado
+      associateData.dataCadastro = firebase.firestore.FieldValue.serverTimestamp(); // Adiciona data de cadastro
       await db.collection('associates').add(associateData);
       alert('Associado cadastrado com sucesso!');
     }
-    associateForm.reset();
-    // Após salvar, verificar para qual lista o associado vai e recarregar
-    if (associateData.statusAssociado.toLowerCase() === 'ativo') {
+    associateForm.reset(); // Limpa o formulário
+
+    // Redireciona para a lista correta após salvar
+    const status = associateData.statusAssociado.toLowerCase();
+    if (status === 'ativo') {
       showSection('admitidos');
       await loadAssociatesFilteredToList('ativo', 'associates-admitidos-table-body');
-    } else if (associateData.statusAssociado.toLowerCase() === 'em admissão') { // Supondo que você use 'Em Admissão' como status
+    } else if (status === 'em admissão') {
       showSection('em-admissao');
       await loadAssociatesFilteredToList('Em Admissão', 'associates-em-admissao-table-body');
-    } else { // Se for outro status, recarrega a lista de admitidos por padrão ou ajusta conforme sua lógica
+    } else {
+      // Se for outro status, ou para garantir, recarrega a lista principal ou a de admitidos
       showSection('admitidos');
       await loadAssociatesFilteredToList('ativo', 'associates-admitidos-table-body');
     }
+
   } catch (error) {
     console.error("Erro ao salvar associado: ", error);
     alert("Ocorreu um erro ao salvar o associado.");
@@ -679,7 +687,7 @@ async function loadAssociatesFilteredToList(statusFilter = null, tableBodyId = '
 }
 
 
-// Funções de edição e exclusão de associados (mantidas, mas a navegação após edição precisa ser pensada)
+// Funções de edição e exclusão de associados (atualizadas com os novos campos)
 async function editAssociate(associateId) {
   try {
     const doc = await db.collection('associates').doc(associateId).get();
@@ -689,18 +697,27 @@ async function editAssociate(associateId) {
 
       // Preenche o formulário
       associateForm.dataset.associateId = doc.id;
-      associateForm.querySelector('#associate-full-name').value = associate.nomeCompleto;
-      associateForm.querySelector('#associate-dob').value = associate.dataNascimento;
-      associateForm.querySelector(`input[name="associate-gender"][value="${associate.genero}"]`).checked = true;
-      associateForm.querySelector('#associate-rg').value = associate.rg;
-      associateForm.querySelector('#associate-cpf').value = associate.cpf;
-      associateForm.querySelector('#associate-address').value = associate.endereco;
-      associateForm.querySelector('#associate-cep').value = associate.cep;
-      associateForm.querySelector('#associate-phone').value = associate.telefone;
-      associateForm.querySelector('#associate-email').value = associate.email;
+      associateForm.querySelector('#associate-full-name').value = associate.nomeCompleto || '';
+      associateForm.querySelector('#associate-dob').value = associate.dataNascimento || '';
+      const genderRadio = associateForm.querySelector(`input[name="associate-gender"][value="${associate.genero}"]`);
+      if (genderRadio) genderRadio.checked = true;
+      associateForm.querySelector('#associate-rg').value = associate.rg || '';
+      associateForm.querySelector('#associate-cpf').value = associate.cpf || '';
+      associateForm.querySelector('#associate-address').value = associate.endereco || '';
+      associateForm.querySelector('#associate-cep').value = associate.cep || '';
+      associateForm.querySelector('#associate-phone').value = associate.telefone || '';
+      associateForm.querySelector('#associate-email').value = associate.email || '';
       associateForm.querySelector('#associate-type').value = associate.tipoAssociado || '';
-      associateForm.querySelector('#associate-association-date').value = associate.dataAssociacao;
-      associateForm.querySelector(`input[name="associate-status"][value="${associate.statusAssociado}"]`).checked = true;
+      associateForm.querySelector('#associate-association-date').value = associate.dataAssociacao || '';
+      const statusRadio = associateForm.querySelector(`input[name="associate-status"][value="${associate.statusAssociado}"]`);
+      if (statusRadio) statusRadio.checked = true;
+
+      // Novos campos
+      associateForm.querySelector('#associate-medical-conditions').value = associate.condicoesMedicas || '';
+      associateForm.querySelector('#associate-medical-treatment').checked = associate.recebeTratamentoMedico || false;
+      associateForm.querySelector('#associate-cultivation-experience').value = associate.experienciaCultivo || '';
+      associateForm.querySelector('#associate-cultivation-method').value = associate.metodologiaCultivo || '';
+      associateForm.querySelector('#associate-observations').value = associate.observacoesAdicionais || '';
 
       showSection('cadastro-associados');
       alert('Associado carregado para edição.');
@@ -718,9 +735,11 @@ async function deleteAssociate(associateId) {
     try {
       await db.collection('associates').doc(associateId).delete();
       alert('Associado excluído com sucesso!');
-      // Após a exclusão, recarrega a lista de associados admitidos
+      // Após a exclusão, recarrega a lista de associados admitidos (ou a seção ativa atual)
+      // Para ser mais robusto, recarrega ambas, se estiverem abertas
       await loadAssociatesFilteredToList('ativo', 'associates-admitidos-table-body');
-      showSection('admitidos'); // Redireciona para a lista de admitidos
+      await loadAssociatesFilteredToList('Em Admissão', 'associates-em-admissao-table-body');
+      // showSection('admitidos'); // Opcional: redireciona para a lista de admitidos após excluir
     } catch (error) {
       console.error("Erro ao excluir associado: ", error);
       alert("Ocorreu um erro ao excluir o associado.");
@@ -728,7 +747,7 @@ async function deleteAssociate(associateId) {
   }
 }
 
-// Geração de PDF de Associados (sem alterações, mas pode ser adaptada para filtros futuros)
+// Geração de PDF de Associados (sem alterações significativas aqui, apenas se precisar incluir os novos campos)
 async function generateAssociatesPdf() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -738,7 +757,7 @@ async function generateAssociatesPdf() {
 
   const associates = [];
   try {
-    const associatesSnapshot = await db.collection('associates').get(); // Pega todos para o PDF
+    const associatesSnapshot = await db.collection('associates').get();
     associatesSnapshot.forEach(doc => {
       associates.push(doc.data());
     });

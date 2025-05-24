@@ -28,23 +28,17 @@ body {
     box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25); /* Sombra suave cinza */
 }
 
-/* Cores dos botões de login para o tema preto e branco */
+/* Cores dos botões de login para o tema */
 .btn-dark {
-    background-color: #212529 !important; /* Preto forte */
-    border-color: #212529 !important;
+    background-color: #343a40 !important; /* Um tom de preto mais escuro */
+    border-color: #343a40 !important;
     color: white !important;
 }
 
 .btn-dark:hover {
-    background-color: #000000 !important; /* Mais escuro no hover */
-    border-color: #000000 !important;
+    background-color: #212529 !important; /* Um preto ainda mais escuro no hover */
+    border-color: #212529 !important;
 }
-
-/* Mensagem de erro */
-.text-danger {
-    color: #dc3545 !important; /* Mantém o vermelho para erro */
-}
-
 
 /* ------------------------------------- */
 /* Estilos para o Dashboard (dashboard.html) */
@@ -57,21 +51,16 @@ body {
 #sidebar-wrapper {
   min-height: 100vh;
   margin-left: -15rem;
-  transition: margin .25s ease-out;
-  background-color: #212529 !important; /* Fundo do sidebar preto */
+  -webkit-transition: margin 0.25s ease-out;
+  -moz-transition: margin 0.25s ease-out;
+  -o-transition: margin 0.25s ease-out;
+  transition: margin 0.25s ease-out;
 }
 
 #sidebar-wrapper .sidebar-heading {
   padding: 0.875rem 1.25rem;
   font-size: 1.2rem;
-  color: white; /* Texto branco para o título do sidebar */
 }
-
-/* Inverter a logo no sidebar para que ela apareça branca em um fundo escuro */
-#sidebar-wrapper img {
-    filter: invert(100%);
-}
-
 
 #sidebar-wrapper .list-group {
   width: 15rem;
@@ -79,187 +68,84 @@ body {
 
 #page-content-wrapper {
   min-width: 100vw;
-  flex-grow: 1; /* Permite que o conteúdo principal ocupe o espaço restante */
 }
 
 #wrapper.toggled #sidebar-wrapper {
   margin-left: 0;
 }
 
+#wrapper.toggled #page-content-wrapper {
+  margin-left: 15rem;
+}
+
 @media (min-width: 768px) {
   #sidebar-wrapper {
     margin-left: 0;
   }
+
   #page-content-wrapper {
     min-width: 0;
     width: 100%;
   }
+
   #wrapper.toggled #sidebar-wrapper {
     margin-left: -15rem;
   }
+
+  #wrapper.toggled #page-content-wrapper {
+    margin-left: 0;
+  }
 }
 
-/* Ajustes de tema para o Sidebar */
+/* Sidebar Customization */
 .sidebar {
-    border-right: 1px solid #444; /* Borda lateral sutil */
+    background-color: #343a40 !important; /* Cor de fundo da sidebar */
 }
 
-.sidebar .list-group-item-action {
-    color: #f8f9fa; /* Texto branco claro */
+.sidebar .list-group-item {
+    background-color: #343a40; /* Itens do menu com o mesmo fundo da sidebar */
+    color: #adb5bd; /* Cor do texto dos itens do menu */
+    border: none; /* Remove as bordas padrão */
+    padding: 0.75rem 1.25rem; /* Espaçamento interno */
 }
 
-.sidebar .list-group-item-action:hover {
-    background-color: #343a40 !important; /* Cinza escuro no hover */
-    color: #f8f9fa !important;
+.sidebar .list-group-item:hover {
+    background-color: #495057; /* Fundo mais escuro no hover */
+    color: #e9ecef; /* Texto mais claro no hover */
 }
 
-.sidebar .list-group-item-action.active {
-    background-color: #495057 !important; /* Cinza um pouco mais claro para ativo */
-    color: #fff !important;
+.sidebar .list-group-item.active {
+    background-color: #6c757d !important; /* Cor de destaque para o item ativo */
+    color: #ffffff !important; /* Texto branco para o item ativo */
 }
 
-.sidebar .list-group-item-action.text-white-50 {
-    color: rgba(248, 249, 250, 0.7) !important; /* Branco 50% transparente para subitens */
-}
-.sidebar .list-group-item-action.text-white-50:hover {
-    background-color: #343a40 !important;
-}
-
-
-/* Navbar do Dashboard */
-.navbar.bg-white {
-    background-color: #ffffff !important; /* Fundo branco para a navbar */
-    border-bottom-color: #e9ecef !important; /* Borda inferior cinza clara */
+/* Estilo para ícones no sidebar */
+.sidebar .list-group-item .fas {
+    margin-right: 0.5rem;
+    color: #adb5bd; /* Cor dos ícones */
 }
 
-/* Seções do Dashboard */
-.section {
-    display: none; /* Esconde todas as seções por padrão */
-}
-.section.active {
-    display: block; /* Mostra a seção ativa */
+.sidebar .list-group-item.active .fas {
+    color: #ffffff; /* Cor dos ícones no item ativo */
 }
 
-/* Cards de conteúdo no dashboard */
-.card {
-    background-color: #ffffff; /* Fundo branco para cards de conteúdo */
-    border: 1px solid #dee2e6; /* Borda cinza clara */
-    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important; /* Sombra sutil */
+/* Navbar no topo */
+.navbar {
+    border-bottom: 1px solid #e9ecef; /* Borda inferior clara */
 }
 
-/* Títulos H2 nas seções */
-h2 {
-    color: #212529; /* Cor do título para contraste com o fundo branco */
-    margin-bottom: 1.5rem;
+/* Content Area */
+.container-fluid {
+    padding: 1.5rem;
 }
 
-/* Botões do Formulário de Produtos */
-.btn-success {
-    background-color: #28a745 !important;
-    border-color: #28a745 !important;
-}
-.btn-success:hover {
-    background-color: #218838 !important;
-    border-color: #1e7e34 !important;
+/* Cards para seções de conteúdo */
+.content-section .card {
+    border: 1px solid #e9ecef;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
-.btn-warning {
-    background-color: #ffc107 !important;
-    border-color: #ffc107 !important;
-}
-.btn-warning:hover {
-    background-color: #e0a800 !important;
-    border-color: #d39e00 !important;
-}
-
-.btn-danger {
-    background-color: #dc3545 !important;
-    border-color: #dc3545 !important;
-}
-.btn-danger:hover {
-    background-color: #c82333 !important;
-    border-color: #bd2130 !important;
-}
-
-.btn-outline-dark {
-    border-color: #343a40 !important;
-    color: #343a40 !important;
-}
-.btn-outline-dark:hover {
-    background-color: #343a40 !important;
-    color: white !important;
-}
-
-/* Tabela de Consulta */
-.table-hover tbody tr:hover {
-    background-color: #f2f2f2 !important; /* Cinza claro no hover da linha da tabela */
-}
-
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: #f8f9fa; /* Branco levemente cinza para linhas ímpares */
-}
-
-.table-dark {
-    background-color: #343a40 !important; /* Cabeçalho da tabela cinza escuro */
-    color: white !important;
-}
-
-.table-dark th {
-    border-color: #454d55 !important; /* Borda do cabeçalho da tabela */
-}
-
-/* Botões de Ação na Tabela */
-.action-buttons .btn-outline-warning {
-    color: #ffc107 !important;
-    border-color: #ffc107 !important;
-}
-.action-buttons .btn-outline-warning:hover {
-    background-color: #ffc107 !important;
-    color: #212529 !important; /* Texto escuro no hover */
-}
-
-.action-buttons .btn-outline-danger {
-    color: #dc3545 !important;
-    border-color: #dc3545 !important;
-}
-.action-buttons .btn-outline-danger:hover {
-    background-color: #dc3545 !important;
-    color: white !important;
-}
-
-/* Mensagem de "Nenhum produto cadastrado" */
-.text-muted {
-    color: #6c757d !important;
-}
-
-/* Modal de Novo Tipo de Produto */
-.modal-content {
-    border-radius: .5rem;
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
-}
-
-.modal-header {
-    background-color: #f8f9fa; /* Fundo cinza claro para o cabeçalho do modal */
-    border-bottom: 1px solid #e9ecef;
-}
-
-.modal-footer {
-    background-color: #f8f9fa; /* Fundo cinza claro para o rodapé do modal */
-    border-top: 1px solid #e9ecef;
-}
-
-/* Botão de gerar PDF */
-.btn-dark {
-    background-color: #343a40 !important; /* Tom de preto mais escuro */
-    border-color: #343a40 !important;
-    color: white !important;
-}
-.btn-dark:hover {
-    background-color: #212529 !important; /* Mais escuro no hover */
-    border-color: #212529 !important;
-}
-
-/* Novos estilos para a tela de cadastro de produtos */
+/* Títulos dentro dos cards (para seções) */
 .card h5 {
     border-bottom: 1px solid #dee2e6;
     padding-bottom: 0.5rem;
@@ -267,6 +153,14 @@ h2 {
     color: #343a40 !important; /* Títulos das seções dentro do card */
 }
 
+/* Ícones nos títulos dos cards */
+.card h5 .fas {
+    font-size: 1.2rem; /* Tamanho do ícone */
+    vertical-align: middle; /* Alinha o ícone com o texto */
+    color: #6c757d; /* Cor mais suave para os ícones de título */
+}
+
+/* Estilo para radio buttons e checkboxes inline */
 .form-check-inline {
     margin-right: 1.5rem; /* Espaçamento entre os radio buttons */
 }
@@ -279,9 +173,30 @@ h2 {
     margin-left: 0.25rem; /* Espaçamento do label para o checkbox/radio */
 }
 
+/* Placeholder color */
+.form-control::placeholder {
+    color: #a0a0a0;
+    opacity: 1; /* For Firefox */
+}
+
+/* Table styles */
+.table-responsive {
+    margin-top: 1rem;
+}
+
+.table thead th {
+    background-color: #f8f9fa; /* Fundo leve para o cabeçalho da tabela */
+    border-bottom: 2px solid #dee2e6;
+    color: #343a40;
+}
+
+.table tbody tr:hover {
+    background-color: #f0f0f0; /* Fundo mais claro no hover da linha da tabela */
+}
+
 /* Estilo para tooltips (Bootstrap 5) */
 .tooltip-inner {
-    background-color: #343a40; /* Fundo escuro para o tooltip */
+    background-color: #343a40;
     color: white;
 }
 .tooltip.bs-tooltip-auto[data-popper-placement^=top] .tooltip-arrow::before {
@@ -295,38 +210,35 @@ h2 {
 }
 .tooltip.bs-tooltip-auto[data-popper-placement^=right] .tooltip-arrow::before {
     border-right-color: #343a40;
-}/* ... seu CSS existente ... */
-
-/* Estilos para o submenu */
-.sidebar .collapse .list-group-item {
-    background-color: #212529 !important; /* Cor mais escura para os subitens */
-    border-left: 3px solid transparent; /* Borda para indicar subitem */
 }
 
-.sidebar .collapse .list-group-item:hover {
-    background-color: #343a40 !important; /* Cor no hover dos subitens */
-    border-left-color: #0d6efd; /* Cor da borda no hover (azul do Bootstrap primary) */
-}
-
-.sidebar .list-group-item.active {
-    background-color: #0d6efd !important; /* Cor de item ativo */
-    border-left: 3px solid #0d6efd; /* Borda para item ativo */
-}
-
-.sidebar .list-group-item.active:hover {
-    background-color: #0b5ed7 !important; /* Cor de item ativo no hover */
-}
-
-/* Ajuste para o ícone de seta no menu colapsável */
+/* Ícone de seta para submenus */
 .arrow-icon {
-    transition: transform 0.3s ease-in-out;
+    transition: transform 0.2s ease-in-out;
 }
 
+/* Rotaciona a seta quando o colapso está aberto */
 .list-group-item[aria-expanded="true"] .arrow-icon {
     transform: rotate(180deg);
 }
 
-/* Espaçamento extra para os submenus */
-.list-group-item.ps-5 {
-    padding-left: 3rem !important; /* Ajusta o padding para indentar os subitens */
+/* Botão de gerar PDF */
+.btn-dark {
+    background-color: #343a40 !important;
+    border-color: #343a40 !important;
+    color: white !important;
+}
+.btn-dark:hover {
+    background-color: #212529 !important;
+    border-color: #212529 !important;
+}
+
+/* Ajustes para o botão Salvar Associado */
+.btn-primary.btn-lg {
+    background-color: #007bff; /* Azul padrão do Bootstrap, ajuste se quiser outra cor */
+    border-color: #007bff;
+}
+.btn-primary.btn-lg:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
 }
