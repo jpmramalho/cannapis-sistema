@@ -1,4 +1,4 @@
-// A constante `db` (firebase.firestore()) é inicializada no dashboard.html, antes deste script.
+// A constante `db` (firebase.firestore()) e `storage` (firebase.storage()) são inicializadas no dashboard.html, antes deste script.
 
 let lastActiveSection = 'home'; // Valor padrão
 
@@ -19,8 +19,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
   }
 
+  // Inicializa tooltips do Bootstrap 5
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+  });
+
   if (document.getElementById('product-type')) {
     await loadProductTypes();
+    await loadSuppliers(); // Carregar fornecedores
+    await loadAssociateTypes(); // Carregar tipos de associado
   }
 
   if (document.getElementById('dashboard-container')) {
@@ -39,135 +47,55 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
   }
 
-  // Bootstrap Toggle para o Sidebar (opcional, mas comum com este layout)
-  const menuToggle = document.getElementById('menu-toggle');
-  if (menuToggle) {
-    menuToggle.addEventListener('click', function() {
+  // Bootstrap Toggle para o Sidebar
+  var sidebarToggle = document.getElementById('menu-toggle');
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', function (e) {
+      e.preventDefault();
       document.getElementById('wrapper').classList.toggle('toggled');
     });
   }
 });
 
-function toggleSubmenu() {
-  // Bootstrap cuida do colapso com data-bs-toggle="collapse" e href="#produtos-submenu"
-  // Não precisamos mais manipular o estilo diretamente aqui
-  // A classe 'active' no link principal pode ser adicionada/removida no showSection para feedback visual
-}
 
+// Funções de navegação do Dashboard
 async function showSection(sectionId) {
-  localStorage.setItem('lastActiveSection', sectionId);
-  lastActiveSection = sectionId;
-
-  // Atualiza título da seção
-  const sectionTitle = document.getElementById('section-title');
-  if (sectionTitle) {
-      sectionTitle.textContent = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
-  }
-
-
-  // Esconde todas as seções e remove 'active'
   const sections = document.querySelectorAll('.section');
-  sections.forEach((section) => section.classList.remove('active'));
+  sections.forEach(section => {
+    section.classList.remove('active');
+  });
 
-  // Mostra a seção selecionada
-  const selected = document.getElementById(sectionId);
-  if (selected) selected.classList.add('active');
+  document.getElementById(sectionId).classList.add('active');
+  localStorage.setItem('lastActiveSection', sectionId);
 
-  // Remove 'active' de todos os itens do menu
-  const menuItems = document.querySelectorAll('.list-group-item-action');
-  menuItems.forEach((item) => item.classList.remove('active'));
-
-  // Adiciona 'active' ao item de menu correto
-  const selectedMenuItem = document.querySelector(`.list-group-item-action[onclick*="showSection('${sectionId}')"]`);
-  if (selectedMenuItem) {
-    selectedMenuItem.classList.add('active');
-  }
-
-  // Se a seção 'cadastro', 'consulta' ou 'relatorio' for ativada, abra o submenu 'produtos'.
-  if (['cadastro', 'consulta', 'relatorio'].includes(sectionId)) {
-    const produtosSubmenu = new bootstrap.Collapse(document.getElementById('produtos-submenu'), {
-      toggle: false // Não alterna, apenas garante que esteja aberto
-    });
-    if (!document.getElementById('produtos-submenu').classList.contains('show')) {
-        produtosSubmenu.show();
-    }
-    // Adiciona a classe 'active' ao link principal do "Produtos"
-    const produtosLink = document.querySelector('.list-group-item-action[data-bs-toggle="collapse"]');
-    if (produtosLink) produtosLink.classList.add('active');
-  } else {
-     // Se não é uma seção de produto, garante que o submenu esteja fechado e o link "Produtos" não esteja ativo
-     const produtosSubmenu = new bootstrap.Collapse(document.getElementById('produtos-submenu'), {
-      toggle: false
-    });
-    produtosSubmenu.hide();
-    const produtosLink = document.querySelector('.list-group-item-action[data-bs-toggle="collapse"]');
-    if (produtosLink) produtosLink.classList.remove('active');
-  }
-
-
+  // Atualizar a lista de produtos apenas se for a seção de consulta
   if (sectionId === 'consulta') {
     await renderProductList();
   }
-}
-
-function logout() {
-  alert('Você saiu do sistema.');
-  localStorage.removeItem('lastActiveSection');
-  window.location.href = 'index.html';
-}
-
-function openNewProductTypeModal() {
-  const newProductTypeModal = new bootstrap.Modal(document.getElementById('new-product-type-modal'));
-  newProductTypeModal.show();
-  document.getElementById('new-product-type-input').value = '';
-}
-
-// Bootstrap cuida de fechar o modal com data-bs-dismiss="modal" no botão de fechar
-// A função closeNewProductTypeModal não é mais necessária explicitamente para fechar o modal
-// Mas pode ser útil se você precisar fazer algo extra ao fechar.
-function closeNewProductTypeModal() {
-  const newProductTypeModal = bootstrap.Modal.getInstance(document.getElementById('new-product-type-modal'));
-  if (newProductTypeModal) {
-    newProductTypeModal.hide();
+  // Atualizar o contador de produtos na home
+  if (sectionId === 'home') {
+    await updateProductCount();
   }
 }
 
-
-async function saveNewProductTypeToFirestore() {
-  const newTypeInput = document.getElementById('new-product-type-input');
-  const newType = newTypeInput.value.trim();
-
-  if (!newType) {
-    alert('Por favor, insira um nome para o novo tipo de produto.');
-    return;
-  }
-
+// Função para atualizar o contador de produtos na Home
+async function updateProductCount() {
   try {
-    const existingTypes = await db.collection('productTypes').where('name', '==', newType).get();
-    if (!existingTypes.empty) {
-        alert(`O tipo de produto "${newType}" já existe.`);
-        return;
-    }
-
-    await db.collection('productTypes').add({
-      name: newType,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    alert(`Tipo de Produto "${newType}" salvo com sucesso!`);
-    await loadProductTypes();
-    closeNewProductTypeModal(); // Fecha o modal após salvar
+    const productsSnapshot = await db.collection('products').get();
+    document.getElementById('total-products').textContent = productsSnapshot.size;
   } catch (error) {
-    console.error("Erro ao salvar novo tipo de produto: ", error);
-    alert("Ocorreu um erro ao salvar o tipo de produto. Verifique o console.");
+    console.error("Erro ao carregar contagem de produtos: ", error);
+    document.getElementById('total-products').textContent = 'Erro';
   }
 }
 
 
+// Funções para Tipos de Produto
 async function loadProductTypes() {
   const productTypeSelect = document.getElementById('product-type');
   if (!productTypeSelect) return;
 
-  productTypeSelect.innerHTML = '<option value="">Selecione ou Cadastre</option>';
+  productTypeSelect.innerHTML = '<option value="">Selecione ou Cadastre</option>'; // Limpa e adiciona opção padrão
 
   try {
     const typesSnapshot = await db.collection('productTypes').orderBy('name').get();
@@ -184,12 +112,112 @@ async function loadProductTypes() {
   }
 }
 
+function openNewProductTypeModal() {
+  const newProductTypeModal = new bootstrap.Modal(document.getElementById('new-product-type-modal'));
+  newProductTypeModal.show();
+}
+
+async function saveNewProductTypeToFirestore() {
+  const newProductTypeInput = document.getElementById('new-product-type-input');
+  const newTypeName = newProductTypeInput.value.trim();
+
+  if (!newTypeName) {
+    alert('Por favor, insira um nome para o novo tipo de produto.');
+    return;
+  }
+
+  try {
+    // Verifica se o tipo já existe
+    const existingType = await db.collection('productTypes').where('name', '==', newTypeName).get();
+    if (!existingType.empty) {
+      alert('Este tipo de produto já existe.');
+      return;
+    }
+
+    await db.collection('productTypes').add({ name: newTypeName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    alert(`Tipo "${newTypeName}" salvo com sucesso!`);
+    newProductTypeInput.value = ''; // Limpa o input
+    const newProductTypeModal = bootstrap.Modal.getInstance(document.getElementById('new-product-type-modal'));
+    newProductTypeModal.hide(); // Fecha o modal
+    await loadProductTypes(); // Recarrega os tipos na lista
+  } catch (error) {
+    console.error("Erro ao salvar novo tipo de produto: ", error);
+    alert("Ocorreu um erro ao salvar o novo tipo de produto.");
+  }
+}
+
+
+// NOVAS FUNÇÕES PARA CARREGAR DROPDOWNS (Fornecedores e Tipos de Associados)
+async function loadSuppliers() {
+  const supplierSelect = document.getElementById('product-supplier');
+  if (!supplierSelect) return;
+
+  supplierSelect.innerHTML = '<option value="">Selecione...</option>';
+
+  try {
+    const suppliersSnapshot = await db.collection('suppliers').orderBy('name').get(); // Assumindo uma coleção 'suppliers'
+    suppliersSnapshot.forEach(doc => {
+      const supplier = doc.data();
+      const option = document.createElement('option');
+      option.value = supplier.name;
+      option.textContent = supplier.name;
+      supplierSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error("Erro ao carregar fornecedores: ", error);
+    // alert("Ocorreu um erro ao carregar os fornecedores."); // Opcional: alertar o usuário
+  }
+}
+
+async function loadAssociateTypes() {
+  const associateTypeSelect = document.getElementById('segment-by-associate-type');
+  if (!associateTypeSelect) return;
+
+  associateTypeSelect.innerHTML = '<option value="nenhum">Nenhum</option>';
+
+  try {
+    const typesSnapshot = await db.collection('associateTypes').orderBy('name').get(); // Assumindo uma coleção 'associateTypes'
+    typesSnapshot.forEach(doc => {
+      const type = doc.data();
+      const option = document.createElement('option');
+      option.value = type.name;
+      option.textContent = type.name;
+      associateTypeSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error("Erro ao carregar tipos de associado: ", error);
+    // alert("Ocorreu um erro ao carregar os tipos de associado."); // Opcional: alertar o usuário
+  }
+}
+
+
+// Funções de CRUD de Produtos
 async function saveProduct() {
   const productType = document.getElementById('product-type').value.trim();
   const productName = document.getElementById('product-name').value.trim();
-  const productDescription = document.getElementById('product-description').value.trim();
-  const productPrice = parseFloat(document.getElementById('product-price').value);
+  const productDescriptionSummary = document.getElementById('product-description-summary').value.trim();
+  const productDescriptionFull = document.getElementById('product-description-full').value.trim();
+  const productStatus = document.getElementById('product-status').value;
+  const productOnline = document.getElementById('product-online').checked;
+  const productRestricted = document.getElementById('product-restricted').checked;
+  const productSupplier = document.getElementById('product-supplier').value.trim();
 
+  const availableFor = document.querySelector('input[name="available-for"]:checked').value;
+  const segmentByAssociateType = document.getElementById('segment-by-associate-type').value;
+  const isCourtesy = document.getElementById('is-courtesy').value;
+  const allowConfigurableValue = document.getElementById('allow-configurable-value').value;
+  const enableStockControl = document.getElementById('enable-stock-control').checked;
+  const qtyLimitPerOrder = parseInt(document.getElementById('qty-limit-per-order').value) || 0;
+
+  const hasDelivery = document.getElementById('has-delivery').value;
+  const insertTaxes = document.getElementById('insert-taxes').value;
+  const accountingCode = document.getElementById('accounting-code').value.trim();
+
+  const productPhotosInput = document.getElementById('product-photos');
+  const productPhotosFiles = productPhotosInput.files;
+
+
+  // Validações básicas
   if (!productType) {
       alert('Por favor, selecione um Tipo de Produto.');
       return;
@@ -198,40 +226,67 @@ async function saveProduct() {
     alert('Nome do Produto é obrigatório!');
     return;
   }
-  if (isNaN(productPrice) || productPrice < 0) {
-      alert('Por favor, insira um preço válido para o produto.');
-      return;
-  }
+  // Adicione mais validações aqui para os novos campos, se necessário
 
   const form = document.getElementById('product-registration-form');
   const editingProductId = form.dataset.editingProductId;
+  let photoUrls = [];
 
   try {
+    // Lógica para upload de fotos (exemplo básico, você precisará de mais robustez)
+    if (productPhotosFiles.length > 0) {
+      for (const file of productPhotosFiles) {
+        const storageRef = storage.ref('product_images/' + file.name);
+        const snapshot = await storageRef.put(file);
+        const downloadURL = await snapshot.ref.getDownloadURL();
+        photoUrls.push(downloadURL);
+      }
+      alert('Imagens carregadas com sucesso!');
+    }
+
+    const productData = {
+      tipo: productType,
+      nome: productName,
+      descricaoResumida: productDescriptionSummary,
+      descricaoCompleta: productDescriptionFull,
+      status: productStatus,
+      online: productOnline,
+      restrito: productRestricted,
+      fornecedor: productSupplier,
+      disponivelPara: availableFor,
+      segmentarPorTipoAssociado: segmentByAssociateType,
+      cortesia: isCourtesy,
+      permitirValorConfiguravel: allowConfigurableValue,
+      habilitarControleEstoque: enableStockControl,
+      qtdLimitePorPedido: qtyLimitPerOrder,
+      temEntrega: hasDelivery,
+      inserirImpostos: insertTaxes,
+      codigoContabil: accountingCode,
+      fotos: photoUrls, // Armazena as URLs das fotos
+      // Preço é um campo que não está no formulário da imagem, mas existia antes.
+      // Se você quiser adicionar, inclua aqui. Ex: preco: parseFloat(document.getElementById('product-price').value) || 0,
+    };
+
     if (editingProductId) {
       const productRef = db.collection('products').doc(editingProductId);
-      await productRef.update({
-        tipo: productType,
-        nome: productName,
-        descricao: productDescription,
-        preco: productPrice.toFixed(2)
-      });
+      // Se houver fotos novas, você pode optar por sobrescrever ou adicionar às existentes
+      // Aqui, estamos apenas atualizando as que foram carregadas no momento
+      await productRef.update(productData);
       alert(`Produto "${productName}" atualizado com sucesso no Firebase!`);
       delete form.dataset.editingProductId;
     } else {
-      await db.collection('products').add({
-        tipo: productType,
-        nome: productName,
-        descricao: productDescription,
-        preco: productPrice.toFixed(2),
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      productData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('products').add(productData);
       alert(`Produto "${productName}" salvo com sucesso no Firebase!`);
     }
 
     form.reset();
-    document.getElementById('product-type').value = '';
+    document.getElementById('product-type').value = ''; // Resetar o select de tipo
+    // Limpar o input de fotos após o upload
+    if (productPhotosInput) productPhotosInput.value = '';
 
-    await renderProductList();
+    await renderProductList(); // Atualizar a lista de produtos na consulta
+    await updateProductCount(); // Atualizar o contador na home
   } catch (error) {
     console.error("Erro ao salvar/atualizar produto: ", error);
     alert("Ocorreu um erro ao salvar/atualizar o produto. Verifique o console para mais detalhes.");
@@ -239,50 +294,41 @@ async function saveProduct() {
 }
 
 async function renderProductList() {
-  const productListBody = document.getElementById('product-list-body');
-  const noProductsMessage = document.getElementById('no-products-message');
+  const productListDiv = document.getElementById('product-list');
+  if (!productListDiv) return;
 
-  if (!productListBody) return;
-
-  productListBody.innerHTML = '';
+  productListDiv.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Carregando produtos...</td></tr>';
 
   try {
-    const productsCollection = await db.collection('products').orderBy('createdAt', 'asc').get();
-    const products = productsCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const productsSnapshot = await db.collection('products').orderBy('nome').get();
+    productListDiv.innerHTML = ''; // Limpa antes de adicionar
 
-    if (products.length === 0) {
-      noProductsMessage.style.display = 'block';
+    if (productsSnapshot.empty) {
+      productListDiv.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Nenhum produto cadastrado.</td></tr>';
       return;
-    } else {
-      noProductsMessage.style.display = 'none';
     }
 
-    products.forEach((product, index) => {
-      const row = productListBody.insertRow();
-      row.insertCell().textContent = index + 1;
-      row.insertCell().textContent = product.tipo || 'N/A';
-      row.insertCell().textContent = product.nome;
-      row.insertCell().textContent = product.descricao || 'Sem descrição';
-      row.insertCell().textContent = `R$ ${String(product.preco).replace('.', ',')}`;
-
-      const actionsCell = row.insertCell();
-      actionsCell.classList.add('action-buttons');
-
-      const editButton = document.createElement('button');
-      editButton.textContent = 'Editar';
-      editButton.classList.add('btn', 'btn-sm', 'btn-outline-warning', 'me-1');
-      editButton.onclick = () => editProductFromList(product.id);
-      actionsCell.appendChild(editButton);
-
-      const deleteButton = document.createElement('button');
-      deleteButton.textContent = 'Excluir';
-      deleteButton.classList.add('btn', 'btn-sm', 'btn-outline-danger');
-      deleteButton.onclick = () => deleteProductFromList(product.id);
-      actionsCell.appendChild(deleteButton);
+    productsSnapshot.forEach(doc => {
+      const product = { id: doc.id, ...doc.data() };
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${product.tipo || 'N/A'}</td>
+        <td>${product.nome}</td>
+        <td>${product.descricaoResumida || 'Sem descrição resumida'}</td>
+        <td class="action-buttons">
+          <button class="btn btn-outline-warning btn-sm me-2" onclick="editProductFromList('${product.id}')">
+            <i class="fas fa-edit"></i> Editar
+          </button>
+          <button class="btn btn-outline-danger btn-sm" onclick="deleteProductFromList('${product.id}')">
+            <i class="fas fa-trash-alt"></i> Excluir
+          </button>
+        </td>
+      `;
+      productListDiv.appendChild(row);
     });
   } catch (error) {
-    console.error("Erro ao buscar produtos do Firebase: ", error);
-    alert("Ocorreu um erro ao carregar os produtos. Verifique o console para mais detalhes.");
+    console.error("Erro ao renderizar lista de produtos: ", error);
+    productListDiv.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Erro ao carregar produtos.</td></tr>';
   }
 }
 
@@ -294,13 +340,37 @@ async function editProductFromList(productId) {
 
       document.getElementById('product-type').value = productToEdit.tipo || '';
       document.getElementById('product-name').value = productToEdit.nome || '';
-      document.getElementById('product-description').value = productToEdit.descricao || '';
-      document.getElementById('product-price').value = parseFloat(productToEdit.preco);
+      document.getElementById('product-description-summary').value = productToEdit.descricaoResumida || '';
+      document.getElementById('product-description-full').value = productToEdit.descricaoCompleta || '';
+      document.getElementById('product-status').value = productToEdit.status || 'ativo';
+      document.getElementById('product-online').checked = productToEdit.online || false;
+      document.getElementById('product-restricted').checked = productToEdit.restrito || false;
+      document.getElementById('product-supplier').value = productToEdit.fornecedor || '';
+
+      // Selecionar o radio button correto para 'available-for'
+      const availableForRadios = document.querySelectorAll('input[name="available-for"]');
+      availableForRadios.forEach(radio => {
+          if (radio.value === (productToEdit.disponivelPara || 'todos')) {
+              radio.checked = true;
+          }
+      });
+      document.getElementById('segment-by-associate-type').value = productToEdit.segmentarPorTipoAssociado || 'nenhum';
+      document.getElementById('is-courtesy').value = productToEdit.cortesia || 'nao';
+      document.getElementById('allow-configurable-value').value = productToEdit.permitirValorConfiguravel || 'nao';
+      document.getElementById('enable-stock-control').checked = productToEdit.habilitarControleEstoque || false;
+      document.getElementById('qty-limit-per-order').value = productToEdit.qtdLimitePorPedido || 0;
+
+      document.getElementById('has-delivery').value = productToEdit.temEntrega || 'nao';
+      document.getElementById('insert-taxes').value = productToEdit.inserirImpostos || 'nao';
+      document.getElementById('accounting-code').value = productToEdit.codigoContabil || '';
+
+      // NOTA: Para fotos, você precisaria de uma lógica para exibir as fotos existentes
+      // e permitir a remoção/adição de novas. Isso é mais complexo e não está incluído aqui.
 
       document.getElementById('product-registration-form').dataset.editingProductId = productToEdit.id;
 
       alert(`Dados do produto "${productToEdit.nome}" carregados para edição. Altere os campos e clique em "Salvar" para atualizar.`);
-      await showSection('cadastro');
+      await showSection('cadastro'); // Volta para a seção de cadastro
     } else {
       alert("Produto não encontrado para edição.");
     }
@@ -311,11 +381,12 @@ async function editProductFromList(productId) {
 }
 
 async function deleteProductFromList(productId) {
-  if (confirm('Tem certeza que deseja excluir este produto do Firebase?')) {
+  if (confirm('Tem certeza que deseja excluir este produto?')) {
     try {
       await db.collection('products').doc(productId).delete();
-      alert('Produto excluído com sucesso do Firebase.');
-      await renderProductList();
+      alert('Produto excluído com sucesso!');
+      await renderProductList(); // Atualiza a lista após exclusão
+      await updateProductCount(); // Atualiza o contador na home
     } catch (error) {
       console.error("Erro ao excluir produto: ", error);
       alert("Ocorreu um erro ao excluir o produto. Verifique o console para mais detalhes.");
@@ -323,30 +394,66 @@ async function deleteProductFromList(productId) {
   }
 }
 
-function editProduct() {
-  alert('Para editar um produto, use o botão "Editar" na tabela de "Consulta de Produtos".');
-}
-
-function deleteProduct() {
-  alert('Para excluir um produto, use o botão "Excluir" na tabela de "Consulta de Produtos".');
-}
-
-async function generateProductReportPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  doc.text("Relatório de Produtos - Cannapis", 10, 10);
+async function searchProducts() {
+  const searchInput = document.getElementById('search-input').value.toLowerCase();
+  const productListDiv = document.getElementById('product-list');
+  productListDiv.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Buscando produtos...</td></tr>';
 
   try {
-    const productsCollection = await db.collection('products').orderBy('createdAt', 'asc').get();
-    const products = productsCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const productsSnapshot = await db.collection('products').orderBy('nome').get();
+    productListDiv.innerHTML = '';
+
+    let found = false;
+    productsSnapshot.forEach(doc => {
+      const product = { id: doc.id, ...doc.data() };
+      const productName = product.nome.toLowerCase();
+      const productType = product.tipo ? product.tipo.toLowerCase() : '';
+
+      if (productName.includes(searchInput) || productType.includes(searchInput)) {
+        found = true;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${product.tipo || 'N/A'}</td>
+          <td>${product.nome}</td>
+          <td>${product.descricaoResumida || 'Sem descrição resumida'}</td>
+          <td class="action-buttons">
+            <button class="btn btn-outline-warning btn-sm me-2" onclick="editProductFromList('${product.id}')">
+              <i class="fas fa-edit"></i> Editar
+            </button>
+            <button class="btn btn-outline-danger btn-sm" onclick="deleteProductFromList('${product.id}')">
+              <i class="fas fa-trash-alt"></i> Excluir
+            </button>
+          </td>
+        `;
+        productListDiv.appendChild(row);
+      }
+    });
+
+    if (!found) {
+      productListDiv.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Nenhum produto encontrado.</td></tr>';
+    }
+  } catch (error) {
+    console.error("Erro ao pesquisar produtos: ", error);
+    productListDiv.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Erro ao pesquisar produtos.</td></tr>';
+  }
+}
+
+async function generateProductReport() {
+  try {
+    const productsSnapshot = await db.collection('products').orderBy('nome').get();
+    const products = productsSnapshot.docs.map(doc => doc.data());
 
     if (products.length === 0) {
       alert("Não há produtos para gerar o relatório.");
       return;
     }
 
-    const tableColumn = ["Cód.", "Tipo", "Nome", "Descrição", "Preço"];
+    const doc = new jspdf.jsPDF();
+
+    doc.setFontSize(16);
+    doc.text("Relatório de Produtos Cannapis", 14, 15);
+
+    const tableColumn = ["Cód.", "Tipo", "Nome", "Descrição Resumida", "Status", "Online", "Restrito", "Fornecedor"]; // Adicione as novas colunas
     const tableRows = [];
 
     products.forEach((product, index) => {
@@ -354,8 +461,11 @@ async function generateProductReportPDF() {
         index + 1,
         product.tipo || 'N/A',
         product.nome,
-        product.descricao || 'Sem descrição',
-        `R$ ${String(product.preco).replace('.', ',')}`
+        product.descricaoResumida || 'Sem descrição',
+        product.status || 'N/A',
+        product.online ? 'Sim' : 'Não',
+        product.restrito ? 'Sim' : 'Não',
+        product.fornecedor || 'N/A'
       ];
       tableRows.push(productData);
     });
@@ -376,16 +486,16 @@ async function generateProductReportPDF() {
       margin: { top: 10, left: 10, right: 10, bottom: 10 },
       didDrawPage: function (data) {
         let str = "Página " + doc.internal.getNumberOfPages();
-        doc.setFontSize(8);
+        // rodapé
+        doc.setFontSize(10);
         doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
       }
     });
 
     doc.save('relatorio_produtos_cannapis.pdf');
     alert("Relatório PDF gerado com sucesso!");
-
   } catch (error) {
-    console.error("Erro ao gerar relatório PDF: ", error);
-    alert("Ocorreu um erro ao gerar o relatório PDF. Verifique o console.");
+    console.error("Erro ao gerar relatório: ", error);
+    alert("Ocorreu um erro ao gerar o relatório. Verifique o console para mais detalhes.");
   }
 }

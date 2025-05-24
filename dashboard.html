@@ -15,74 +15,264 @@
         <img src="Logo Cannapis.jpg" alt="Logo Cannapis" class="img-fluid" style="max-width: 100px; filter: invert(100%);" /> <h2 class="sidebar-heading text-white mt-2">Cannapis</h2>
       </div>
       <div class="list-group list-group-flush">
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white border-0 active" onclick="showSection('home')">
+        <a href="#" class="list-group-item list-group-item-action bg-dark text-white" onclick="showSection('home')">
           <i class="fas fa-home me-2"></i>Home
         </a>
-        <a href="#produtos-submenu" data-bs-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action bg-dark text-white border-0" onclick="toggleSubmenu()">
-          <i class="fas fa-box me-2"></i>Produtos <i class="fas fa-caret-down float-end"></i>
+        <a href="#" class="list-group-item list-group-item-action bg-dark text-white" onclick="showSection('cadastro')">
+          <i class="fas fa-plus-circle me-2"></i>Cadastro de Produtos
         </a>
-        <div class="collapse list-group-flush" id="produtos-submenu">
-          <a href="#" class="list-group-item list-group-item-action bg-dark text-white-50 border-0 ps-5" onclick="showSection('cadastro')">Cadastro</a>
-          <a href="#" class="list-group-item list-group-item-action bg-dark text-white-50 border-0 ps-5" onclick="showSection('consulta')">Consulta</a>
-          <a href="#" class="list-group-item list-group-item-action bg-dark text-white-50 border-0 ps-5" onclick="showSection('relatorio')">Relatório</a>
-        </div>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white border-0" onclick="showSection('pedidos')">
-          <i class="fas fa-clipboard-list me-2"></i>Pedidos
+        <a href="#" class="list-group-item list-group-item-action bg-dark text-white" onclick="showSection('consulta')">
+          <i class="fas fa-search me-2"></i>Consulta de Produtos
         </a>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white border-0" onclick="logout()">
+        <a href="#" class="list-group-item list-group-item-action bg-dark text-white-50" onclick="showSection('pedidos')">
+          <i class="fas fa-shopping-cart me-2"></i>Pedidos (Em breve)
+        </a>
+        <a href="#" class="list-group-item list-group-item-action bg-dark text-white-50" onclick="showSection('financeiro')">
+          <i class="fas fa-wallet me-2"></i>Financeiro (Em breve)
+        </a>
+        <a href="#" class="list-group-item list-group-item-action bg-dark text-white-50" onclick="showSection('relatorios')">
+          <i class="fas fa-chart-line me-2"></i>Relatórios (Em breve)
+        </a>
+        <a href="index.html" class="list-group-item list-group-item-action bg-dark text-white">
           <i class="fas fa-sign-out-alt me-2"></i>Sair
         </a>
       </div>
     </div>
-    <div id="page-content-wrapper" class="flex-grow-1">
-      <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
-        <div class="container-fluid">
-          <button class="btn btn-outline-secondary d-md-none" id="menu-toggle">
-            <i class="fas fa-bars"></i>
-          </button>
-          <h1 class="navbar-brand mb-0 h4" id="section-title">Home</h1>
+    <div id="page-content-wrapper">
+      <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+        <button class="btn btn-dark" id="menu-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+              <a class="nav-link" href="#">Bem-vindo(a), Administrador!</a>
+            </li>
+          </ul>
         </div>
       </nav>
 
-      <div class="container-fluid py-4">
+      <div class="container-fluid mt-4" id="dashboard-container">
         <div id="home" class="section active">
-          <div class="alert alert-info" role="alert">
-            Bem-vindo ao painel administrativo da Cannapis.
+          <h2 class="mb-3">Home</h2>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="card text-center mb-4">
+                <div class="card-body">
+                  <i class="fas fa-box fa-3x mb-3 text-dark"></i>
+                  <h5 class="card-title text-dark">Total de Produtos</h5>
+                  <p class="card-text fs-3 text-dark" id="total-products">0</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card text-center mb-4">
+                <div class="card-body">
+                  <i class="fas fa-users fa-3x mb-3 text-dark"></i>
+                  <h5 class="card-title text-dark">Associados Ativos</h5>
+                  <p class="card-text fs-3 text-dark">--</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card text-center mb-4">
+                <div class="card-body">
+                  <i class="fas fa-money-bill-wave fa-3x mb-3 text-dark"></i>
+                  <h5 class="card-title text-dark">Vendas do Mês</h5>
+                  <p class="card-text fs-3 text-dark">R$ --,--</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <div id="cadastro" class="section">
-          <h2>Cadastro de Produtos</h2>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0">Cadastro de Produtos</h2>
+          </div>
+
           <div class="card p-4 mb-4">
             <form id="product-registration-form">
-              <div class="mb-3">
-                <label for="product-type" class="form-label">Tipo de Produto:</label>
-                <div class="input-group">
-                  <select id="product-type" name="product-type" class="form-select" required>
-                    <option value="">Selecione ou Cadastre</option>
-                  </select>
-                  <button type="button" class="btn btn-outline-dark" onclick="openNewProductTypeModal()">
-                    <i class="fas fa-plus"></i>
-                  </button>
+              <div class="mb-4">
+                <h5 class="text-dark mb-3"><i class="fas fa-pencil-alt me-2"></i>Informações do Produto <span class="text-danger">*</span></h5>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="product-type" class="form-label">Tipo de Produto: <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                      <select id="product-type" name="product-type" class="form-select" required>
+                        <option value="">Selecione ou Cadastre</option>
+                        </select>
+                      <button type="button" class="btn btn-outline-dark" onclick="openNewProductTypeModal()">
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="product-status" class="form-label">Status: <span class="text-danger">*</span></label>
+                    <select id="product-status" name="product-status" class="form-select" required>
+                      <option value="ativo">Ativo</option>
+                      <option value="inativo">Inativo</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row g-3 mt-3">
+                    <div class="col-md-6 d-flex align-items-center">
+                        <div class="form-check form-switch me-3">
+                            <input class="form-check-input" type="checkbox" id="product-online" name="product-online">
+                            <label class="form-check-label" for="product-online">Produto Online?</label>
+                        </div>
+                        <i class="fas fa-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Indica se deve aparecer no site (área do associado)."></i>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center">
+                        <div class="form-check form-switch me-3">
+                            <input class="form-check-input" type="checkbox" id="product-restricted" name="product-restricted">
+                            <label class="form-check-label" for="product-restricted">Produto Restrito?</label>
+                        </div>
+                        <i class="fas fa-info-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Quando informado sim, estará disponível somente aos associados que possuem autorização na aba (Produtos Autorizados)."></i>
+                    </div>
+                </div>
+
+                <div class="mb-3 mt-3">
+                  <label for="product-name" class="form-label">Nome do Produto: <span class="text-danger">*</span></label>
+                  <input type="text" id="product-name" name="product-name" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                  <label for="product-description-summary" class="form-label">Descrição Resumida:</label>
+                  <input type="text" id="product-description-summary" name="product-description-summary" class="form-control" />
+                </div>
+
+                <div class="mb-4">
+                  <label for="product-description-full" class="form-label">Descrição Completa:</label>
+                  <textarea id="product-description-full" name="product-description-full" rows="4" class="form-control"></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label for="product-supplier" class="form-label">Fornecedor:</label>
+                    <div class="input-group">
+                        <select id="product-supplier" name="product-supplier" class="form-select">
+                            <option value="">Selecione...</option>
+                            </select>
+                        <button type="button" class="btn btn-outline-dark">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
                 </div>
               </div>
 
-              <div class="mb-3">
-                <label for="product-name" class="form-label">Nome do Produto: <span class="text-danger">*</span></label>
-                <input type="text" id="product-name" name="product-name" class="form-control" required />
-              </div>
+              <div class="mb-4">
+                <h5 class="text-dark mb-3"><i class="fas fa-cog me-2"></i>Configurações de Venda</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Disponível para:</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="available-for" id="available-all" value="todos" checked>
+                                    <label class="form-check-label" for="available-all">Todos</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="available-for" id="available-associated" value="associados">
+                                    <label class="form-check-label" for="available-associated">Somente Associados</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="available-for" id="available-adimplent" value="adimplentes">
+                                    <label class="form-check-label" for="available-adimplent">Somente Adimplentes</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="segment-by-associate-type" class="form-label">Segmentar por Tipo de Associado</label>
+                        <select id="segment-by-associate-type" name="segment-by-associate-type" class="form-select">
+                            <option value="nenhum">Nenhum</option>
+                            </select>
+                        <small class="form-text text-muted">Preencha somente caso o produto seja exclusivo para alguns tipos de associados.</small>
+                    </div>
+                </div>
 
-              <div class="mb-3">
-                <label for="product-description" class="form-label">Descrição do Produto:</label>
-                <textarea id="product-description" name="product-description" rows="4" class="form-control"></textarea>
+                <div class="row g-3 mt-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="is-courtesy" class="form-label">É UMA CORTESIA?</label>
+                            <select id="is-courtesy" name="is-courtesy" class="form-select">
+                                <option value="nao">Não</option>
+                                <option value="sim">Sim</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="allow-configurable-value" class="form-label">PERMITIR VALOR CONFIGURÁVEL?</label>
+                            <select id="allow-configurable-value" name="allow-configurable-value" class="form-select">
+                                <option value="nao">Não</option>
+                                <option value="sim">Sim</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <small class="form-text text-muted mb-3 d-block">
+                    <i class="fas fa-info-circle me-1"></i>O campo de valor configurável, permitirá alterar o valor do produto/serviço no ato do ato do pedido. <br>
+                    <i class="fas fa-info-circle me-1"></i>Informe apenas um dos dois campos de desconto. Caso informe ambos, o sistema irá considerar o valor absoluto.
+                </small>
+
+
+                <div class="row g-3 mt-3 align-items-center">
+                    <div class="col-md-6 d-flex align-items-center">
+                        <div class="form-check form-switch me-3">
+                            <input class="form-check-input" type="checkbox" id="enable-stock-control" name="enable-stock-control">
+                            <label class="form-check-label" for="enable-stock-control">HABILITAR CONTROLE DE ESTOQUE NOS PEDIDOS?</label>
+                        </div>
+                        <i class="fas fa-question-circle text-muted" data-bs-toggle="tooltip" data-bs-placement="top" title="Se habilitado, o sistema controlará o estoque do produto."></i>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="qty-limit-per-order" class="form-label">QTDE LIMITE POR PEDIDO</label>
+                        <input type="number" id="qty-limit-per-order" name="qty-limit-per-order" class="form-control" min="0" placeholder="0">
+                    </div>
+                </div>
               </div>
 
               <div class="mb-4">
-                <label for="product-price" class="form-label">Preço do Produto: <span class="text-danger">*</span></label>
-                <input type="number" id="product-price" name="product-price" step="0.01" min="0" class="form-control" required />
+                <h5 class="text-dark mb-3"><i class="fas fa-truck me-2"></i>Configurações de Frete</h5>
+                <div class="mb-3">
+                    <label for="has-delivery" class="form-label">TEM ENTREGA?</label>
+                    <select id="has-delivery" name="has-delivery" class="form-select">
+                        <option value="nao">Não</option>
+                        <option value="sim">Sim</option>
+                    </select>
+                </div>
               </div>
 
-              <div class="d-flex justify-content-end">
+              <div class="mb-4">
+                <h5 class="text-dark mb-3"><i class="fas fa-calculator me-2"></i>Configurações de Impostos</h5>
+                <div class="mb-3">
+                    <label for="insert-taxes" class="form-label">INSERIR IMPOSTOS?</label>
+                    <select id="insert-taxes" name="insert-taxes" class="form-select">
+                        <option value="nao">Não</option>
+                        <option value="sim">Sim</option>
+                    </select>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <h5 class="text-dark mb-3"><i class="fas fa-file-invoice-dollar me-2"></i>Configurações Contábeis</h5>
+                <div class="mb-3">
+                    <label for="accounting-code" class="form-label">CÓDIGO CONTÁBIL</label>
+                    <input type="text" id="accounting-code" name="accounting-code" class="form-control" />
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <h5 class="text-dark mb-3"><i class="fas fa-camera me-2"></i>Fotos do Produto</h5>
+                <div class="input-group">
+                    <input type="file" class="form-control" id="product-photos" name="product-photos" multiple accept="image/*">
+                    <button class="btn btn-outline-dark" type="button" id="button-addon2">Procurar ...</button>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end mt-4">
                 <button type="submit" class="btn btn-success me-2">Salvar</button>
                 <button type="button" class="btn btn-warning text-dark me-2" onclick="editProduct()">Editar</button>
                 <button type="button" class="btn btn-danger" onclick="deleteProduct()">Excluir</button>
@@ -112,31 +302,27 @@
 
         <div id="consulta" class="section">
           <h2>Consulta de Produtos</h2>
-          <div class="card p-4">
-            <div class="table-responsive">
-              <table class="table table-hover table-striped">
-                <thead class="table-dark">
-                  <tr>
-                    <th>Cód.</th>
-                    <th>Tipo</th>
-                    <th>Nome</th>
-                    <th>Descrição</th>
-                    <th>Preço</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody id="product-list-body">
-                </tbody>
-              </table>
-            </div>
-            <p id="no-products-message" class="text-center text-muted mt-3" style="display: none;">Nenhum produto cadastrado ainda.</p>
+          <div class="input-group mb-3">
+            <input type="text" id="search-input" class="form-control" placeholder="Pesquisar produtos por nome ou tipo..." aria-label="Pesquisar produtos" aria-describedby="button-addon2">
+            <button class="btn btn-dark" type="button" id="button-addon2" onclick="searchProducts()">Pesquisar</button>
           </div>
-        </div>
 
-        <div id="relatorio" class="section">
-          <h2>Relatório de Produtos</h2>
-          <p class="mb-3">Gere um relatório em PDF dos produtos cadastrados.</p>
-          <button onclick="generateProductReportPDF()" class="btn btn-dark">
+          <table class="table table-striped table-hover mt-4">
+            <thead class="table-dark">
+              <tr>
+                <th>Tipo</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="product-list">
+              <tr>
+                <td colspan="4" class="text-center text-muted">Nenhum produto cadastrado.</td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="btn btn-dark mt-3" onclick="generateProductReport()">
             <i class="fas fa-file-pdf me-2"></i>Gerar Relatório PDF
           </button>
         </div>
@@ -147,30 +333,45 @@
             Histórico de pedidos realizados. (Em desenvolvimento)
           </div>
         </div>
+
+        <div id="financeiro" class="section">
+          <h2>Financeiro</h2>
+          <div class="alert alert-secondary" role="alert">
+            Controle financeiro do sistema. (Em desenvolvimento)
+          </div>
+        </div>
+
+        <div id="relatorios" class="section">
+          <h2>Relatórios</h2>
+          <div class="alert alert-secondary" role="alert">
+            Geração de relatórios diversos. (Em desenvolvimento)
+          </div>
+        </div>
       </div>
     </div>
     </div>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
   <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyCQmUL6DG-Ofona0pII6P4tESDoLcqxV8c",
-      authDomain: "cannapis-68e37.firebaseapp.com",
-      projectId: "cannapis-68e37",
-      storageBucket: "cannapis-68e37.firebasestorage.app",
-      messagingSenderId: "618285951466",
-      appId: "1:618285951466:web:a782c393cffba5b81daa93"
+      apiKey: "YOUR_API_KEY", // Substitua pela sua chave de API
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET", // Adicione o storageBucket
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
+
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const storage = firebase.storage(); // Inicializa o Firebase Storage
   </script>
-
   <script src="script.js"></script>
 </body>
 </html>

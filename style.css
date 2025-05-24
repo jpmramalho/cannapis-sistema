@@ -258,3 +258,41 @@ h2 {
     background-color: #212529 !important; /* Mais escuro no hover */
     border-color: #212529 !important;
 }
+
+/* Novos estilos para a tela de cadastro de produtos */
+.card h5 {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    color: #343a40 !important; /* Títulos das seções dentro do card */
+}
+
+.form-check-inline {
+    margin-right: 1.5rem; /* Espaçamento entre os radio buttons */
+}
+
+.form-check-input {
+    margin-top: 0.3rem; /* Alinhamento do checkbox/radio */
+}
+
+.form-check-label {
+    margin-left: 0.25rem; /* Espaçamento do label para o checkbox/radio */
+}
+
+/* Estilo para tooltips (Bootstrap 5) */
+.tooltip-inner {
+    background-color: #343a40; /* Fundo escuro para o tooltip */
+    color: white;
+}
+.tooltip.bs-tooltip-auto[data-popper-placement^=top] .tooltip-arrow::before {
+    border-top-color: #343a40;
+}
+.tooltip.bs-tooltip-auto[data-popper-placement^=bottom] .tooltip-arrow::before {
+    border-bottom-color: #343a40;
+}
+.tooltip.bs-tooltip-auto[data-popper-placement^=left] .tooltip-arrow::before {
+    border-left-color: #343a40;
+}
+.tooltip.bs-tooltip-auto[data-popper-placement^=right] .tooltip-arrow::before {
+    border-right-color: #343a40;
+}
