@@ -1,22 +1,25 @@
 /* Importante: Comece com os resets e classes globais */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  /* Bootstrap já cuida de margin e padding no body */
+  /* O Bootstrap já cuida da margem e padding no body */
+  background-color: #ffffff; /* Fundo branco para todo o corpo */
 }
 
 /* ------------------------------------- */
 /* Estilos para a Tela de Login (index.html) */
 /* ------------------------------------- */
 
-/* O .login-container agora é um .card do Bootstrap, então os estilos de card serão aplicados */
-/* Personalizações específicas de tema preto e branco para o card */
+/* O .card do Bootstrap já tem fundo branco por padrão */
 .card {
     border: 1px solid #dee2e6; /* Borda cinza clara para cards */
+    color: #212529; /* Texto escuro dentro do card */
 }
 
 /* Ajuste de espaçamento para o logo no login, se necessário */
 .login-logo {
     display: block; /* Garante que a margem auto funcione */
+    max-width: 150px; /* Tamanho da logo */
+    margin: 0 auto 2rem auto; /* Centraliza e adiciona margem inferior */
 }
 
 /* Foco nos inputs Bootstrap para tema preto e branco */
@@ -55,12 +58,20 @@ body {
   min-height: 100vh;
   margin-left: -15rem;
   transition: margin .25s ease-out;
+  background-color: #212529 !important; /* Fundo do sidebar preto */
 }
 
 #sidebar-wrapper .sidebar-heading {
   padding: 0.875rem 1.25rem;
   font-size: 1.2rem;
+  color: white; /* Texto branco para o título do sidebar */
 }
+
+/* Inverter a logo no sidebar para que ela apareça branca em um fundo escuro */
+#sidebar-wrapper img {
+    filter: invert(100%);
+}
+
 
 #sidebar-wrapper .list-group {
   width: 15rem;
@@ -134,6 +145,12 @@ body {
     background-color: #ffffff; /* Fundo branco para cards de conteúdo */
     border: 1px solid #dee2e6; /* Borda cinza clara */
     box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important; /* Sombra sutil */
+}
+
+/* Títulos H2 nas seções */
+h2 {
+    color: #212529; /* Cor do título para contraste com o fundo branco */
+    margin-bottom: 1.5rem;
 }
 
 /* Botões do Formulário de Produtos */
