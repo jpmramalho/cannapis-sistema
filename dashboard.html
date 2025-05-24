@@ -155,7 +155,7 @@
                         <select id="product-supplier" name="product-supplier" class="form-select">
                             <option value="">Selecione...</option>
                             </select>
-                        <button type="button" class="btn btn-outline-dark">
+                        <button type="button" class="btn btn-outline-dark" onclick="openNewSupplierModal()">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
@@ -294,6 +294,25 @@
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                   <button type="button" class="btn btn-dark" onclick="saveNewProductTypeToFirestore()">Salvar Tipo</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal fade" id="new-supplier-modal" tabindex="-1" aria-labelledby="newSupplierModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="newSupplierModalLabel">Cadastrar Novo Fornecedor</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <label for="new-supplier-input" class="form-label">Nome do Fornecedor:</label>
+                  <input type="text" id="new-supplier-input" class="form-control" placeholder="Ex: Farmácia Essencial" />
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                  <button type="button" class="btn btn-dark" onclick="saveNewSupplierToFirestore()">Salvar Fornecedor</button>
                 </div>
               </div>
             </div>

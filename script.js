@@ -25,10 +25,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     return new bootstrap.Tooltip(tooltipTriggerEl)
   });
 
-  if (document.getElementById('product-type')) {
+  // NOVO: Chamada para carregar os dropdowns ao carregar a página
+  if (document.getElementById('product-type')) { // Verifica se estamos na página do dashboard
     await loadProductTypes();
-    await loadSuppliers(); // Carregar fornecedores
-    await loadAssociateTypes(); // Carregar tipos de associado
+    await loadSuppliers();
+    await loadAssociateTypes();
   }
 
   if (document.getElementById('dashboard-container')) {
@@ -147,15 +148,15 @@ async function saveNewProductTypeToFirestore() {
 }
 
 
-// NOVAS FUNÇÕES PARA CARREGAR DROPDOWNS (Fornecedores e Tipos de Associados)
+// NOVAS FUNÇÕES PARA FORNECEDORES
 async function loadSuppliers() {
   const supplierSelect = document.getElementById('product-supplier');
   if (!supplierSelect) return;
 
-  supplierSelect.innerHTML = '<option value="">Selecione...</option>';
+  supplierSelect.innerHTML = '<option value="">Selecione...</option>'; // Limpa e adiciona opção padrão
 
   try {
-    const suppliersSnapshot = await db.collection('suppliers').orderBy('name').get(); // Assumindo uma coleção 'suppliers'
+    const suppliersSnapshot = await db.collection('suppliers').orderBy('name').get();
     suppliersSnapshot.forEach(doc => {
       const supplier = doc.data();
       const option = document.createElement('option');
@@ -169,6 +170,41 @@ async function loadSuppliers() {
   }
 }
 
+function openNewSupplierModal() {
+  const newSupplierModal = new bootstrap.Modal(document.getElementById('new-supplier-modal'));
+  newSupplierModal.show();
+}
+
+async function saveNewSupplierToFirestore() {
+  const newSupplierInput = document.getElementById('new-supplier-input');
+  const newSupplierName = newSupplierInput.value.trim();
+
+  if (!newSupplierName) {
+    alert('Por favor, insira um nome para o novo fornecedor.');
+    return;
+  }
+
+  try {
+    // Verifica se o fornecedor já existe
+    const existingSupplier = await db.collection('suppliers').where('name', '==', newSupplierName).get();
+    if (!existingSupplier.empty) {
+      alert('Este fornecedor já existe.');
+      return;
+    }
+
+    await db.collection('suppliers').add({ name: newSupplierName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    alert(`Fornecedor "${newSupplierName}" salvo com sucesso!`);
+    newSupplierInput.value = ''; // Limpa o input
+    const newSupplierModal = bootstrap.Modal.getInstance(document.getElementById('new-supplier-modal'));
+    newSupplierModal.hide(); // Fecha o modal
+    await loadSuppliers(); // Recarrega os fornecedores na lista
+  } catch (error) {
+    console.error("Erro ao salvar novo fornecedor: ", error);
+    alert("Ocorreu um erro ao salvar o novo fornecedor.");
+  }
+}
+
+// Funções para Tipos de Associados
 async function loadAssociateTypes() {
   const associateTypeSelect = document.getElementById('segment-by-associate-type');
   if (!associateTypeSelect) return;
@@ -214,8 +250,7 @@ async function saveProduct() {
   const accountingCode = document.getElementById('accounting-code').value.trim();
 
   const productPhotosInput = document.getElementById('product-photos');
-  const productPhotosFiles = productPhotosInput.files;
-
+  const productPhotosFiles = productPhotosInput ? productPhotosInput.files : []; // Verifica se o input existe
 
   // Validações básicas
   if (!productType) {
