@@ -1,4 +1,4 @@
-// A constante `db` (firebase.firestore()) e `storage` (firebase.firestore()) são inicializadas no dashboard.html, antes deste script.
+// A constante `db` (firebase.firestore()) e `storage` (firebase.storage()) são inicializadas no dashboard.html, antes deste script.
 
 let lastActiveSection = 'home'; // Valor padrão
 
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     return new bootstrap.Tooltip(tooltipTriggerEl)
   });
 
-  // NOVO: Chamada para carregar os dropdowns ao carregar a página
+  // Chamada para carregar os dropdowns ao carregar a página
   if (document.getElementById('product-type')) { // Verifica se estamos na página do dashboard
     await loadProductTypes();
     await loadSuppliers();
@@ -47,14 +47,28 @@ document.addEventListener('DOMContentLoaded', async function () {
         const targetSectionId = target.dataset.target;
         showSection(targetSectionId);
 
+        // Remove a classe 'active' de todos os itens do menu
+        document.querySelectorAll('.list-group-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        // Adiciona a classe 'active' ao item clicado (se não for um item pai de colapso)
+        if (!target.dataset.bsToggle) { // Garante que não adiciona 'active' ao item 'Produtos'
+          target.classList.add('active');
+        } else { // Se for um item pai (como Produtos), ativar o subitem correspondente
+          // Isso é mais complexo se precisar ativar o pai e o filho, mas para o caso,
+          // o importante é que o filho tenha a classe 'active' quando clicado.
+          // Se quiser o item pai também ativo, precisaria de lógica extra.
+        }
+
+
         // Ações específicas ao abrir certas seções
         if (targetSectionId === 'cadastro-produtos') {
           await loadProductTypes();
           await loadSuppliers();
+        } else if (targetSectionId === 'listar-produtos') { // Agora também para consulta de produtos
+          await loadProductsToList();
         } else if (targetSectionId === 'cadastro-associados') {
           await loadAssociateTypes();
-        } else if (targetSectionId === 'listar-produtos') {
-          await loadProductsToList();
         } else if (targetSectionId === 'listar-associados') {
           await loadAssociatesToList();
         }
@@ -122,7 +136,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     const generateAssociatesPdfBtn = document.getElementById('generate-associates-pdf-btn');
     if (generateAssociatesPdfBtn) {
-      generateAssociatesPdfBtn.addEventListener('click', generateAssociatesPdf);
+      generateAssociatesPdf.addEventListener('click', generateAssociatesPdf);
     }
   }
 });

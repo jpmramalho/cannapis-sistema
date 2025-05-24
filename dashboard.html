@@ -17,8 +17,15 @@
       </div>
       <div class="list-group list-group-flush">
         <a href="#" class="list-group-item list-group-item-action bg-dark text-white active" data-target="home"><i class="fas fa-home me-2"></i>Início</a>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white" data-target="cadastro-produtos"><i class="fas fa-box-open me-2"></i>Cadastro de Produtos</a>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white" data-target="listar-produtos"><i class="fas fa-boxes me-2"></i>Listar Produtos</a>
+
+        <a href="#productsSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action bg-dark text-white d-flex justify-content-between align-items-center">
+          <div><i class="fas fa-box-open me-2"></i>Produtos</div>
+          <i class="fas fa-chevron-down ms-auto arrow-icon"></i>
+        </a>
+        <div class="collapse" id="productsSubmenu">
+          <a href="#" class="list-group-item list-group-item-action bg-dark text-white ps-5" data-target="cadastro-produtos"><i class="fas fa-plus me-2"></i>Cadastro de Produtos</a>
+          <a href="#" class="list-group-item list-group-item-action bg-dark text-white ps-5" data-target="listar-produtos"><i class="fas fa-search me-2"></i>Consulta de Produtos</a>
+        </div>
         <a href="#" class="list-group-item list-group-item-action bg-dark text-white" data-target="cadastro-associados"><i class="fas fa-users me-2"></i>Cadastro de Associados</a>
         <a href="#" class="list-group-item list-group-item-action bg-dark text-white" data-target="listar-associados"><i class="fas fa-user-friends me-2"></i>Listar Associados</a>
         <a href="#" class="list-group-item list-group-item-action bg-dark text-white" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
@@ -346,13 +353,14 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
   <script>
+    // Configurações do Firebase - PREENCHA COM SEUS DADOS REAIS DO CONSOLE DO FIREBASE!
     const firebaseConfig = {
-      apiKey: "SUA_CHAVE_DE_API_AQUI", // VOCÊ PRECISA OBTER ISSO DO CONSOLE DO FIREBASE
-      authDomain: "cannapis-68e37.firebaseapp.com", // Domínio de autenticação padrão do Firebase
+      apiKey: "SUA_CHAVE_DE_API_AQUI", // Exemplo: "AIzaSyB..."
+      authDomain: "cannapis-68e37.firebaseapp.com",
       projectId: "cannapis-68e37",
-      storageBucket: "cannapis-68e37.appspot.com", // Bucket de armazenamento padrão do Firebase
-      messagingSenderId: "618285951466", // Seu número do projeto
-      appId: "SEU_APP_ID_AQUI" // VOCÊ PRECISA OBTER ISSO AO ADICIONAR UM APP WEB NO CONSOLE DO FIREBASE
+      storageBucket: "cannapis-68e37.appspot.com",
+      messagingSenderId: "618285951466",
+      appId: "SEU_APP_ID_AQUI" // Exemplo: "1:234567890:web:abcdef1234567890abcdef"
     };
 
     // Initialize Firebase
