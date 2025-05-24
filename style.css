@@ -1,428 +1,243 @@
+/* Importante: Comece com os resets e classes globais */
 body {
-  margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Nova fonte para um visual mais moderno */
-  background: linear-gradient(to right, #6a93cb, #a4bfef); /* Gradiente de fundo suave */
-  display: flex; /* Usar flexbox para centralização perfeita */
-  justify-content: center; /* Centraliza horizontalmente */
-  align-items: center; /* Centraliza verticalmente */
-  min-height: 100vh; /* Garante que o corpo ocupe a altura total da viewport */
-  color: #333; /* Cor de texto padrão */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* Bootstrap já cuida de margin e padding no body */
 }
 
-/* Estilos para o login */
-.login-container {
-  background-color: #ffffff; /* Fundo branco puro para o contêiner de login */
-  padding: 45px; /* Aumentado o padding para mais espaço interno */
-  border-radius: 15px; /* Bordas mais arredondadas e suaves */
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); /* Sombra mais pronunciada e elevada */
-  max-width: 450px; /* Largura máxima um pouco maior para um layout mais espaçoso */
-  text-align: center;
-  width: 90%; /* Para ser responsivo em telas menores */
-  box-sizing: border-box; /* Garante que padding e borda não aumentem a largura total */
-  animation: fadeIn 0.8s ease-out; /* Adiciona uma animação de fade-in */
+/* ------------------------------------- */
+/* Estilos para a Tela de Login (index.html) */
+/* ------------------------------------- */
+
+/* O .login-container agora é um .card do Bootstrap, então os estilos de card serão aplicados */
+/* Personalizações específicas de tema preto e branco para o card */
+.card {
+    border: 1px solid #dee2e6; /* Borda cinza clara para cards */
 }
 
-/* Animação de fade-in */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
+/* Ajuste de espaçamento para o logo no login, se necessário */
 .login-logo {
-    max-width: 120px; /* Tamanho do logo */
-    margin-bottom: 25px; /* Espaço abaixo do logo */
+    display: block; /* Garante que a margem auto funcione */
 }
 
-.login-container h2 {
-  margin-bottom: 15px; /* Menos espaço para a próxima linha */
-  color: #333;
-  font-size: 32px; /* Título maior e mais impactante */
-  font-weight: 700; /* Mais peso na fonte */
+/* Foco nos inputs Bootstrap para tema preto e branco */
+.form-control:focus {
+    border-color: #6c757d; /* Cinza médio no foco */
+    box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25); /* Sombra suave cinza */
 }
 
-.login-container .welcome-message {
-    margin-bottom: 30px; /* Espaço abaixo da mensagem */
-    color: #666;
-    font-size: 1.1em;
+/* Cores dos botões de login para o tema preto e branco */
+.btn-dark {
+    background-color: #212529 !important; /* Preto forte */
+    border-color: #212529 !important;
+    color: white !important;
 }
 
-.login-container label {
-  display: block;
-  text-align: left;
-  margin-bottom: 10px; /* Mais espaço */
-  font-weight: 600; /* Fonte mais encorpada */
-  color: #555;
-  font-size: 1.1em; /* Tamanho da fonte do label */
+.btn-dark:hover {
+    background-color: #000000 !important; /* Mais escuro no hover */
+    border-color: #000000 !important;
 }
 
-.login-container input[type="text"],
-.login-container input[type="password"] {
-  width: calc(100% - 24px); /* Ajusta para padding e borda */
-  padding: 15px; /* Aumentado o padding */
-  margin-bottom: 25px; /* Mais espaço entre os campos */
-  border: 1px solid #ccc; /* Borda mais suave */
-  border-radius: 8px; /* Bordas mais arredondadas */
-  font-size: 17px; /* Fonte maior */
-  box-sizing: border-box;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Transição suave na borda e sombra */
+/* Mensagem de erro */
+.text-danger {
+    color: #dc3545 !important; /* Mantém o vermelho para erro */
 }
 
-.login-container input[type="text"]:focus,
-.login-container input[type="password"]:focus {
-  border-color: #007bff; /* Cor da borda ao focar */
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.2); /* Sombra suave ao focar */
-  outline: none; /* Remove o outline padrão do navegador */
+
+/* ------------------------------------- */
+/* Estilos para o Dashboard (dashboard.html) */
+/* ------------------------------------- */
+
+#wrapper {
+  overflow-x: hidden;
 }
 
-.login-container button {
-  background-color: #28a745; /* Verde vibrante para o botão */
-  color: white;
-  padding: 15px 30px; /* Padding maior no botão */
-  border: none;
-  border-radius: 8px; /* Bordas mais arredondadas */
-  cursor: pointer;
-  font-size: 19px; /* Texto do botão maior */
-  font-weight: bold;
-  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Transição suave */
-  width: 100%; /* Botão em largura total */
-  letter-spacing: 0.5px; /* Espaçamento entre letras */
+#sidebar-wrapper {
+  min-height: 100vh;
+  margin-left: -15rem;
+  transition: margin .25s ease-out;
 }
 
-.login-container button:hover {
-  background-color: #218838; /* Verde mais escuro no hover */
-  transform: translateY(-3px); /* Pequeno efeito de elevação */
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Sombra no hover */
+#sidebar-wrapper .sidebar-heading {
+  padding: 0.875rem 1.25rem;
+  font-size: 1.2rem;
 }
 
-.login-container .error {
-  color: #dc3545; /* Vermelho para mensagens de erro */
-  margin-top: 20px;
-  font-weight: bold;
-  font-size: 1.05em; /* Tamanho da fonte do erro */
+#sidebar-wrapper .list-group {
+  width: 15rem;
 }
 
-/* Estilos para o dashboard - Mantidos os originais */
-.sidebar {
-  width: 220px;
-  height: 100vh;
-  background-color: #1e1e1e;
-  color: #fff;
-  position: fixed;
-  top: 0;
-  left: 0;
-  padding-top: 20px;
+#page-content-wrapper {
+  min-width: 100vw;
+  flex-grow: 1; /* Permite que o conteúdo principal ocupe o espaço restante */
 }
 
-.sidebar h2 {
-  text-align: center;
-  margin-bottom: 30px;
-  font-size: 24px;
+#wrapper.toggled #sidebar-wrapper {
+  margin-left: 0;
 }
 
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar ul li {
-  padding: 15px 20px;
-  cursor: pointer;
-}
-
-.sidebar ul li:hover {
-  background-color: #333;
-}
-
-.sidebar ul li.active {
-  background-color: #444;
-}
-
-.submenu li {
-  background-color: #2a2a2a;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-
-.submenu li:hover {
-  background-color: #3a3a3a;
-}
-
-.main-content {
-  margin-left: 220px;
-  padding: 20px;
-}
-
-.section {
-  display: none;
-}
-
-.section.active {
-  display: block;
-}
-
-header {
-  background-color: #fff;
-  padding: 15px 20px;
-  border-bottom: 1px solid #ccc;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 24px;
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-  }
-  .main-content {
+@media (min-width: 768px) {
+  #sidebar-wrapper {
     margin-left: 0;
   }
+  #page-content-wrapper {
+    min-width: 0;
+    width: 100%;
+  }
+  #wrapper.toggled #sidebar-wrapper {
+    margin-left: -15rem;
+  }
 }
 
-/* Estilos para o formulário de produtos */
-.product-form-container {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  margin-top: 20px;
+/* Ajustes de tema para o Sidebar */
+.sidebar {
+    border-right: 1px solid #444; /* Borda lateral sutil */
 }
 
-.product-form-container label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
+.sidebar .list-group-item-action {
+    color: #f8f9fa; /* Texto branco claro */
 }
 
-.product-form-container input[type="text"],
-.product-form-container input[type="number"],
-.product-form-container textarea,
-.product-form-container select {
-  width: calc(100% - 22px);
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
+.sidebar .list-group-item-action:hover {
+    background-color: #343a40 !important; /* Cinza escuro no hover */
+    color: #f8f9fa !important;
 }
 
-.product-form-container textarea {
-  resize: vertical;
+.sidebar .list-group-item-action.active {
+    background-color: #495057 !important; /* Cinza um pouco mais claro para ativo */
+    color: #fff !important;
 }
 
-.product-form-container .input-with-button {
-  display: flex;
-  margin-bottom: 15px;
+.sidebar .list-group-item-action.text-white-50 {
+    color: rgba(248, 249, 250, 0.7) !important; /* Branco 50% transparente para subitens */
+}
+.sidebar .list-group-item-action.text-white-50:hover {
+    background-color: #343a40 !important;
 }
 
-.product-form-container .input-with-button input,
-.product-form-container .input-with-button select {
-  flex-grow: 1;
-  margin-bottom: 0;
+
+/* Navbar do Dashboard */
+.navbar.bg-white {
+    background-color: #ffffff !important; /* Fundo branco para a navbar */
+    border-bottom-color: #e9ecef !important; /* Borda inferior cinza clara */
 }
 
-.product-form-container .input-with-button button {
-  padding: 10px 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 10px;
+/* Seções do Dashboard */
+.section {
+    display: none; /* Esconde todas as seções por padrão */
+}
+.section.active {
+    display: block; /* Mostra a seção ativa */
 }
 
-.product-form-container .input-with-button button:hover {
-  background-color: #0056b3;
+/* Cards de conteúdo no dashboard */
+.card {
+    background-color: #ffffff; /* Fundo branco para cards de conteúdo */
+    border: 1px solid #dee2e6; /* Borda cinza clara */
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important; /* Sombra sutil */
 }
 
-.product-form-container .form-actions {
-  text-align: right;
-  margin-top: 20px;
+/* Botões do Formulário de Produtos */
+.btn-success {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+}
+.btn-success:hover {
+    background-color: #218838 !important;
+    border-color: #1e7e34 !important;
 }
 
-.product-form-container .form-actions button {
-  padding: 10px 20px;
-  margin-left: 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
+.btn-warning {
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+}
+.btn-warning:hover {
+    background-color: #e0a800 !important;
+    border-color: #d39e00 !important;
 }
 
-.product-form-container .form-actions button[type="submit"] {
-  background-color: #28a745;
-  color: white;
+.btn-danger {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+.btn-danger:hover {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
 }
 
-.product-form-container .form-actions button[type="submit"]:hover {
-  background-color: #218838;
+.btn-outline-dark {
+    border-color: #343a40 !important;
+    color: #343a40 !important;
+}
+.btn-outline-dark:hover {
+    background-color: #343a40 !important;
+    color: white !important;
 }
 
-.product-form-container .form-actions button:nth-of-type(2) {
-  background-color: #ffc107;
-  color: #333;
+/* Tabela de Consulta */
+.table-hover tbody tr:hover {
+    background-color: #f2f2f2 !important; /* Cinza claro no hover da linha da tabela */
 }
 
-.product-form-container .form-actions button:nth-of-type(2):hover {
-  background-color: #e0a800;
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f8f9fa; /* Branco levemente cinza para linhas ímpares */
 }
 
-.product-form-container .form-actions button:nth-of-type(3) {
-  background-color: #dc3545;
-  color: white;
+.table-dark {
+    background-color: #343a40 !important; /* Cabeçalho da tabela cinza escuro */
+    color: white !important;
 }
 
-.product-form-container .form-actions button:nth-of-type(3):hover {
-  background-color: #c82333;
+.table-dark th {
+    border-color: #454d55 !important; /* Borda do cabeçalho da tabela */
 }
 
-.product-form-container .required {
-  color: red;
-  font-weight: normal;
+/* Botões de Ação na Tabela */
+.action-buttons .btn-outline-warning {
+    color: #ffc107 !important;
+    border-color: #ffc107 !important;
+}
+.action-buttons .btn-outline-warning:hover {
+    background-color: #ffc107 !important;
+    color: #212529 !important; /* Texto escuro no hover */
 }
 
-/* Estilos para o Modal */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.4);
-  padding-top: 60px;
+.action-buttons .btn-outline-danger {
+    color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+.action-buttons .btn-outline-danger:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
 }
 
+/* Mensagem de "Nenhum produto cadastrado" */
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Modal de Novo Tipo de Produto */
 .modal-content {
-  background-color: #fefefe;
-  margin: 5% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-  max-width: 500px;
-  border-radius: 8px;
-  position: relative;
+    border-radius: .5rem;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
 }
 
-.close-button {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
+.modal-header {
+    background-color: #f8f9fa; /* Fundo cinza claro para o cabeçalho do modal */
+    border-bottom: 1px solid #e9ecef;
 }
 
-.close-button:hover,
-.close-button:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
+.modal-footer {
+    background-color: #f8f9fa; /* Fundo cinza claro para o rodapé do modal */
+    border-top: 1px solid #e9ecef;
 }
 
-.modal-content h3 {
-  margin-top: 0;
+/* Botão de gerar PDF */
+.btn-dark {
+    background-color: #343a40 !important; /* Tom de preto mais escuro */
+    border-color: #343a40 !important;
+    color: white !important;
 }
-
-.modal-content input[type="text"] {
-  width: calc(100% - 22px);
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.modal-content button {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.modal-content button:hover {
-  background-color: #0056b3;
-}
-
-/* Estilos para a lista de produtos (Consulta) */
-.product-list-container {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-top: 20px;
-}
-
-.product-list-container table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-.product-list-container th,
-.product-list-container td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
-}
-
-.product-list-container th {
-  background-color: #f2f2f2;
-  font-weight: bold;
-}
-
-.product-list-container tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.product-list-container tbody tr:hover {
-  background-color: #f1f1f1;
-}
-
-.product-list-container .action-buttons button {
-  padding: 5px 10px;
-  margin-right: 5px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.product-list-container .action-buttons .edit-btn {
-  background-color: #ffc107;
-  color: #333;
-}
-
-.product-list-container .action-buttons .edit-btn:hover {
-  background-color: #e0a800;
-}
-
-.product-list-container .action-buttons .delete-btn {
-  background-color: #dc3545;
-  color: white;
-}
-
-.product-list-container .action-buttons .delete-btn:hover {
-  background-color: #c82333;
-}
-
-.generate-pdf-btn {
-    background-color: #007bff;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 15px;
-}
-
-.generate-pdf-btn:hover {
-    background-color: #0056b3;
+.btn-dark:hover {
+    background-color: #212529 !important; /* Mais escuro no hover */
+    border-color: #212529 !important;
 }

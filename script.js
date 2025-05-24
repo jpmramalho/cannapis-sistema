@@ -1,10 +1,8 @@
 // A constante `db` (firebase.firestore()) é inicializada no dashboard.html, antes deste script.
 
-// ALTERAÇÃO 1: Variável para armazenar a última seção ativa
 let lastActiveSection = 'home'; // Valor padrão
 
-// Autenticação simples
-document.addEventListener('DOMContentLoaded', async function () { // Adicionado 'async'
+document.addEventListener('DOMContentLoaded', async function () {
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', function (e) {
@@ -21,110 +19,120 @@ document.addEventListener('DOMContentLoaded', async function () { // Adicionado 
     });
   }
 
-  // Carregar tipos de produto para o SELECT
-  // Garante que os tipos estejam carregados antes de mostrar a seção
-  if (document.getElementById('product-type')) { // Verifica se o select existe
+  if (document.getElementById('product-type')) {
     await loadProductTypes();
   }
 
-
-  // ALTERAÇÃO 1: Restaurar a última seção ativa ao carregar o dashboard
   if (document.getElementById('dashboard-container')) {
     const storedSection = localStorage.getItem('lastActiveSection');
     if (storedSection) {
       lastActiveSection = storedSection;
     }
-    await showSection(lastActiveSection); // Chama showSection que agora é async
+    await showSection(lastActiveSection);
   }
 
-  // Adicionar um event listener para o submit do formulário de produto
   const productForm = document.getElementById('product-registration-form');
   if (productForm) {
     productForm.addEventListener('submit', function(e) {
-      e.preventDefault(); // Impede o envio padrão do formulário
-      saveProduct(); // Chama a função de salvar/atualizar
+      e.preventDefault();
+      saveProduct();
     });
   }
 
-  // Fechar o modal clicando fora dele (para o novo modal de tipo de produto)
-  const newProductTypeModal = document.getElementById('new-product-type-modal');
-  if (newProductTypeModal) {
-    window.onclick = function(event) {
-      if (event.target == newProductTypeModal) {
-        newProductTypeModal.style.display = "none";
-      }
-    }
+  // Bootstrap Toggle para o Sidebar (opcional, mas comum com este layout)
+  const menuToggle = document.getElementById('menu-toggle');
+  if (menuToggle) {
+    menuToggle.addEventListener('click', function() {
+      document.getElementById('wrapper').classList.toggle('toggled');
+    });
   }
 });
 
-// Alternar submenu de Produtos
 function toggleSubmenu() {
-  const submenu = document.getElementById('produtos-submenu');
-  submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
+  // Bootstrap cuida do colapso com data-bs-toggle="collapse" e href="#produtos-submenu"
+  // Não precisamos mais manipular o estilo diretamente aqui
+  // A classe 'active' no link principal pode ser adicionada/removida no showSection para feedback visual
 }
 
-// Mostrar seção selecionada
-async function showSection(sectionId) { // Adicione 'async' aqui
-  // ALTERAÇÃO 1: Salvar a seção atual no localStorage
+async function showSection(sectionId) {
   localStorage.setItem('lastActiveSection', sectionId);
-  lastActiveSection = sectionId; // Atualiza a variável global
+  lastActiveSection = sectionId;
 
-  // Atualiza título
-  document.getElementById('section-title').textContent =
-    sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
+  // Atualiza título da seção
+  const sectionTitle = document.getElementById('section-title');
+  if (sectionTitle) {
+      sectionTitle.textContent = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
+  }
 
-  // Esconde todas
+
+  // Esconde todas as seções e remove 'active'
   const sections = document.querySelectorAll('.section');
   sections.forEach((section) => section.classList.remove('active'));
 
-  // Mostra a escolhida
+  // Mostra a seção selecionada
   const selected = document.getElementById(sectionId);
   if (selected) selected.classList.add('active');
 
-  // Remove 'active' do menu
-  const menuItems = document.querySelectorAll('.sidebar ul > li');
+  // Remove 'active' de todos os itens do menu
+  const menuItems = document.querySelectorAll('.list-group-item-action');
   menuItems.forEach((item) => item.classList.remove('active'));
 
-  // Marca 'Home', 'Pedidos' ou 'Sair' como ativo se aplicável
-  const item = Array.from(menuItems).find((el) => {
-      if (el.textContent.toLowerCase() === sectionId) return true;
-      const submenuItems = el.querySelectorAll('ul li');
-      return Array.from(submenuItems).some(subItem => subItem.textContent.toLowerCase() === sectionId);
-  });
-  if (item) item.classList.add('active');
-
-  // Se a seção 'cadastro', 'consulta' ou 'relatorio' for ativada, abra o submenu 'produtos'.
-  if (sectionId === 'cadastro' || sectionId === 'consulta' || sectionId === 'relatorio') {
-    const produtosSubmenu = document.getElementById('produtos-submenu');
-    if (produtosSubmenu.style.display === 'none') {
-      produtosSubmenu.style.display = 'block';
-    }
+  // Adiciona 'active' ao item de menu correto
+  const selectedMenuItem = document.querySelector(`.list-group-item-action[onclick*="showSection('${sectionId}')"]`);
+  if (selectedMenuItem) {
+    selectedMenuItem.classList.add('active');
   }
 
-  // Se a seção de consulta for mostrada, renderiza a lista de produtos do Firebase
+  // Se a seção 'cadastro', 'consulta' ou 'relatorio' for ativada, abra o submenu 'produtos'.
+  if (['cadastro', 'consulta', 'relatorio'].includes(sectionId)) {
+    const produtosSubmenu = new bootstrap.Collapse(document.getElementById('produtos-submenu'), {
+      toggle: false // Não alterna, apenas garante que esteja aberto
+    });
+    if (!document.getElementById('produtos-submenu').classList.contains('show')) {
+        produtosSubmenu.show();
+    }
+    // Adiciona a classe 'active' ao link principal do "Produtos"
+    const produtosLink = document.querySelector('.list-group-item-action[data-bs-toggle="collapse"]');
+    if (produtosLink) produtosLink.classList.add('active');
+  } else {
+     // Se não é uma seção de produto, garante que o submenu esteja fechado e o link "Produtos" não esteja ativo
+     const produtosSubmenu = new bootstrap.Collapse(document.getElementById('produtos-submenu'), {
+      toggle: false
+    });
+    produtosSubmenu.hide();
+    const produtosLink = document.querySelector('.list-group-item-action[data-bs-toggle="collapse"]');
+    if (produtosLink) produtosLink.classList.remove('active');
+  }
+
+
   if (sectionId === 'consulta') {
-    await renderProductList(); // Chame renderProductList como assíncrona
+    await renderProductList();
   }
 }
 
-// Logout
 function logout() {
   alert('Você saiu do sistema.');
-  localStorage.removeItem('lastActiveSection'); // Limpa a seção salva ao sair
+  localStorage.removeItem('lastActiveSection');
   window.location.href = 'index.html';
 }
 
-// ALTERAÇÃO 2: Funções para o NOVO Modal de Tipo de Produto
 function openNewProductTypeModal() {
-  document.getElementById('new-product-type-modal').style.display = 'block';
-  document.getElementById('new-product-type-input').value = ''; // Limpa o campo
+  const newProductTypeModal = new bootstrap.Modal(document.getElementById('new-product-type-modal'));
+  newProductTypeModal.show();
+  document.getElementById('new-product-type-input').value = '';
 }
 
+// Bootstrap cuida de fechar o modal com data-bs-dismiss="modal" no botão de fechar
+// A função closeNewProductTypeModal não é mais necessária explicitamente para fechar o modal
+// Mas pode ser útil se você precisar fazer algo extra ao fechar.
 function closeNewProductTypeModal() {
-  document.getElementById('new-product-type-modal').style.display = 'none';
+  const newProductTypeModal = bootstrap.Modal.getInstance(document.getElementById('new-product-type-modal'));
+  if (newProductTypeModal) {
+    newProductTypeModal.hide();
+  }
 }
 
-// ALTERAÇÃO 2: Salva um novo tipo de produto no Firestore
+
 async function saveNewProductTypeToFirestore() {
   const newTypeInput = document.getElementById('new-product-type-input');
   const newType = newTypeInput.value.trim();
@@ -135,7 +143,6 @@ async function saveNewProductTypeToFirestore() {
   }
 
   try {
-    // Verifica se o tipo já existe para evitar duplicatas (case-insensitive)
     const existingTypes = await db.collection('productTypes').where('name', '==', newType).get();
     if (!existingTypes.empty) {
         alert(`O tipo de produto "${newType}" já existe.`);
@@ -144,23 +151,23 @@ async function saveNewProductTypeToFirestore() {
 
     await db.collection('productTypes').add({
       name: newType,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp() // Opcional: timestamp de criação
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     alert(`Tipo de Produto "${newType}" salvo com sucesso!`);
-    await loadProductTypes(); // Recarrega o SELECT com o novo tipo
-    closeNewProductTypeModal();
+    await loadProductTypes();
+    closeNewProductTypeModal(); // Fecha o modal após salvar
   } catch (error) {
     console.error("Erro ao salvar novo tipo de produto: ", error);
     alert("Ocorreu um erro ao salvar o tipo de produto. Verifique o console.");
   }
 }
 
-// ALTERAÇÃO 2: Carrega os tipos de produto do Firestore e preenche o SELECT
+
 async function loadProductTypes() {
   const productTypeSelect = document.getElementById('product-type');
-  if (!productTypeSelect) return; // Garante que o elemento existe antes de tentar manipulá-lo
+  if (!productTypeSelect) return;
 
-  productTypeSelect.innerHTML = '<option value="">Selecione ou Cadastre</option>'; // Resetar opções
+  productTypeSelect.innerHTML = '<option value="">Selecione ou Cadastre</option>';
 
   try {
     const typesSnapshot = await db.collection('productTypes').orderBy('name').get();
@@ -177,14 +184,12 @@ async function loadProductTypes() {
   }
 }
 
-// Funções para os botões do formulário de produto (AGORA INTERAGEM COM FIRESTORE)
 async function saveProduct() {
   const productType = document.getElementById('product-type').value.trim();
   const productName = document.getElementById('product-name').value.trim();
   const productDescription = document.getElementById('product-description').value.trim();
   const productPrice = parseFloat(document.getElementById('product-price').value);
 
-  // ALTERAÇÃO 3: Validação de campo vazio para Tipo e Preço
   if (!productType) {
       alert('Por favor, selecione um Tipo de Produto.');
       return;
@@ -203,7 +208,6 @@ async function saveProduct() {
 
   try {
     if (editingProductId) {
-      // Lógica para EDIÇÃO
       const productRef = db.collection('products').doc(editingProductId);
       await productRef.update({
         tipo: productType,
@@ -212,41 +216,37 @@ async function saveProduct() {
         preco: productPrice.toFixed(2)
       });
       alert(`Produto "${productName}" atualizado com sucesso no Firebase!`);
-      delete form.dataset.editingProductId; // Remove o ID de edição
+      delete form.dataset.editingProductId;
     } else {
-      // Lógica para NOVO CADASTRO
       await db.collection('products').add({
         tipo: productType,
         nome: productName,
         descricao: productDescription,
         preco: productPrice.toFixed(2),
-        createdAt: firebase.firestore.FieldValue.serverTimestamp() // Opcional: timestamp de criação
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
       alert(`Produto "${productName}" salvo com sucesso no Firebase!`);
     }
 
-    // Limpa o formulário após salvar/atualizar
     form.reset();
-    document.getElementById('product-type').value = ''; // Limpa o select
+    document.getElementById('product-type').value = '';
 
-    await renderProductList(); // Atualiza a lista na tela após a operação no DB
+    await renderProductList();
   } catch (error) {
     console.error("Erro ao salvar/atualizar produto: ", error);
     alert("Ocorreu um erro ao salvar/atualizar o produto. Verifique o console para mais detalhes.");
   }
 }
 
-// Renderiza a lista de produtos na tabela (AGORA BUSCA DO FIRESTORE)
 async function renderProductList() {
   const productListBody = document.getElementById('product-list-body');
   const noProductsMessage = document.getElementById('no-products-message');
 
-  if (!productListBody) return; // Garante que estamos na página correta (dashboard)
+  if (!productListBody) return;
 
-  productListBody.innerHTML = ''; // Limpa a tabela antes de renderizar
+  productListBody.innerHTML = '';
 
   try {
-    // Busca produtos ordenados por data de criação para ter uma "sequência"
     const productsCollection = await db.collection('products').orderBy('createdAt', 'asc').get();
     const products = productsCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -257,26 +257,26 @@ async function renderProductList() {
       noProductsMessage.style.display = 'none';
     }
 
-    products.forEach((product, index) => { // ALTERAÇÃO 5: Adicionado 'index'
+    products.forEach((product, index) => {
       const row = productListBody.insertRow();
-      row.insertCell().textContent = index + 1; // ALTERAÇÃO 5: Código sequencial para exibição
+      row.insertCell().textContent = index + 1;
       row.insertCell().textContent = product.tipo || 'N/A';
       row.insertCell().textContent = product.nome;
       row.insertCell().textContent = product.descricao || 'Sem descrição';
-      row.insertCell().textContent = `R$ ${String(product.preco).replace('.', ',')}`; // Garante que é string antes de replace
+      row.insertCell().textContent = `R$ ${String(product.preco).replace('.', ',')}`;
 
       const actionsCell = row.insertCell();
       actionsCell.classList.add('action-buttons');
 
       const editButton = document.createElement('button');
       editButton.textContent = 'Editar';
-      editButton.classList.add('edit-btn');
+      editButton.classList.add('btn', 'btn-sm', 'btn-outline-warning', 'me-1');
       editButton.onclick = () => editProductFromList(product.id);
       actionsCell.appendChild(editButton);
 
       const deleteButton = document.createElement('button');
       deleteButton.textContent = 'Excluir';
-      deleteButton.classList.add('delete-btn');
+      deleteButton.classList.add('btn', 'btn-sm', 'btn-outline-danger');
       deleteButton.onclick = () => deleteProductFromList(product.id);
       actionsCell.appendChild(deleteButton);
     });
@@ -286,23 +286,21 @@ async function renderProductList() {
   }
 }
 
-// Funções para editar e excluir da lista de consulta
 async function editProductFromList(productId) {
   try {
     const productDoc = await db.collection('products').doc(productId).get();
     if (productDoc.exists) {
       const productToEdit = { id: productDoc.id, ...productDoc.data() };
 
-      // ALTERAÇÃO 2: Define o valor do SELECT
       document.getElementById('product-type').value = productToEdit.tipo || '';
       document.getElementById('product-name').value = productToEdit.nome || '';
       document.getElementById('product-description').value = productToEdit.descricao || '';
-      document.getElementById('product-price').value = parseFloat(productToEdit.preco); // Converte de volta para número
+      document.getElementById('product-price').value = parseFloat(productToEdit.preco);
 
       document.getElementById('product-registration-form').dataset.editingProductId = productToEdit.id;
 
       alert(`Dados do produto "${productToEdit.nome}" carregados para edição. Altere os campos e clique em "Salvar" para atualizar.`);
-      await showSection('cadastro'); // Redireciona para a seção de cadastro
+      await showSection('cadastro');
     } else {
       alert("Produto não encontrado para edição.");
     }
@@ -317,7 +315,7 @@ async function deleteProductFromList(productId) {
     try {
       await db.collection('products').doc(productId).delete();
       alert('Produto excluído com sucesso do Firebase.');
-      await renderProductList(); // Atualiza a lista após a exclusão
+      await renderProductList();
     } catch (error) {
       console.error("Erro ao excluir produto: ", error);
       alert("Ocorreu um erro ao excluir o produto. Verifique o console para mais detalhes.");
@@ -325,18 +323,16 @@ async function deleteProductFromList(productId) {
   }
 }
 
-// Funções que eram placeholders no formulário, agora só alertam para usar a lista
 function editProduct() {
-  alert('Funcionalidade "Editar" no formulário de cadastro: Para editar um produto, primeiro selecione-o na lista de "Consulta" através do botão "Editar" na linha do produto.');
+  alert('Para editar um produto, use o botão "Editar" na tabela de "Consulta de Produtos".');
 }
 
 function deleteProduct() {
-  alert('Funcionalidade "Excluir" no formulário de cadastro: Para excluir um produto, selecione-o na lista de "Consulta" através do botão "Excluir" na linha do produto.');
+  alert('Para excluir um produto, use o botão "Excluir" na tabela de "Consulta de Produtos".');
 }
 
-// ALTERAÇÃO 4: Função para gerar o relatório PDF
 async function generateProductReportPDF() {
-  const { jsPDF } = window.jspdf; // Acessa jsPDF do objeto window
+  const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
   doc.text("Relatório de Produtos - Cannapis", 10, 10);
@@ -355,7 +351,7 @@ async function generateProductReportPDF() {
 
     products.forEach((product, index) => {
       const productData = [
-        index + 1, // Código sequencial para o PDF
+        index + 1,
         product.tipo || 'N/A',
         product.nome,
         product.descricao || 'Sem descrição',
@@ -364,19 +360,21 @@ async function generateProductReportPDF() {
       tableRows.push(productData);
     });
 
-    // Adiciona a tabela ao PDF
     doc.autoTable({
       head: [tableColumn],
       body: tableRows,
       startY: 20,
-      headStyles: { fillColor: [50, 50, 50] },
+      headStyles: { fillColor: [50, 50, 50] }, // Tons de cinza escuro
       styles: {
         fontSize: 8,
-        cellPadding: 3
+        cellPadding: 3,
+        textColor: [0, 0, 0] // Preto para o texto da tabela
+      },
+      alternateRowStyles: {
+        fillColor: [240, 240, 240] // Cinza claro para linhas alternadas
       },
       margin: { top: 10, left: 10, right: 10, bottom: 10 },
       didDrawPage: function (data) {
-        // Footer com número da página
         let str = "Página " + doc.internal.getNumberOfPages();
         doc.setFontSize(8);
         doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
