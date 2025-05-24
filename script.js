@@ -22,7 +22,11 @@ document.addEventListener('DOMContentLoaded', async function () { // Adicionado 
   }
 
   // Carregar tipos de produto para o SELECT
-  await loadProductTypes(); // Garante que os tipos estejam carregados antes de mostrar a seção
+  // Garante que os tipos estejam carregados antes de mostrar a seção
+  if (document.getElementById('product-type')) { // Verifica se o select existe
+    await loadProductTypes();
+  }
+
 
   // ALTERAÇÃO 1: Restaurar a última seção ativa ao carregar o dashboard
   if (document.getElementById('dashboard-container')) {
@@ -154,6 +158,8 @@ async function saveNewProductTypeToFirestore() {
 // ALTERAÇÃO 2: Carrega os tipos de produto do Firestore e preenche o SELECT
 async function loadProductTypes() {
   const productTypeSelect = document.getElementById('product-type');
+  if (!productTypeSelect) return; // Garante que o elemento existe antes de tentar manipulá-lo
+
   productTypeSelect.innerHTML = '<option value="">Selecione ou Cadastre</option>'; // Resetar opções
 
   try {
@@ -286,7 +292,7 @@ async function editProductFromList(productId) {
     const productDoc = await db.collection('products').doc(productId).get();
     if (productDoc.exists) {
       const productToEdit = { id: productDoc.id, ...productDoc.data() };
-      
+
       // ALTERAÇÃO 2: Define o valor do SELECT
       document.getElementById('product-type').value = productToEdit.tipo || '';
       document.getElementById('product-name').value = productToEdit.nome || '';
@@ -294,9 +300,9 @@ async function editProductFromList(productId) {
       document.getElementById('product-price').value = parseFloat(productToEdit.preco); // Converte de volta para número
 
       document.getElementById('product-registration-form').dataset.editingProductId = productToEdit.id;
-      
+
       alert(`Dados do produto "${productToEdit.nome}" carregados para edição. Altere os campos e clique em "Salvar" para atualizar.`);
-      showSection('cadastro'); // Redireciona para a seção de cadastro
+      await showSection('cadastro'); // Redireciona para a seção de cadastro
     } else {
       alert("Produto não encontrado para edição.");
     }
