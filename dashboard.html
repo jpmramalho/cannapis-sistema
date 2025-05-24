@@ -16,33 +16,26 @@
         <h2 class="sidebar-heading text-white mt-2">Cannapis</h2>
       </div>
       <div class="list-group list-group-flush">
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white p-3 border-bottom border-secondary" data-section="home">
-          <i class="fas fa-home me-2"></i>Início
+        <a href="#" class="list-group-item list-group-item-action bg-dark text-white active" data-target="home"><i class="fas fa-home me-2"></i>Início</a>
+
+        <a href="#productsSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action bg-dark text-white d-flex justify-content-between align-items-center">
+          <div><i class="fas fa-box-open me-2"></i>Produtos</div>
+          <i class="fas fa-chevron-down ms-auto arrow-icon"></i>
         </a>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white p-3 border-bottom border-secondary" data-section="products">
-          <i class="fas fa-box me-2"></i>Estoque de Produtos
+        <div class="collapse" id="productsSubmenu">
+          <a href="#" class="list-group-item list-group-item-action bg-dark text-white ps-5" data-target="cadastro-produtos"><i class="fas fa-plus me-2"></i>Cadastro de Produtos</a>
+          <a href="#" class="list-group-item list-group-item-action bg-dark text-white ps-5" data-target="listar-produtos"><i class="fas fa-search me-2"></i>Consulta de Produtos</a>
+        </div>
+        <a href="#associatesSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="list-group-item list-group-item-action bg-dark text-white d-flex justify-content-between align-items-center">
+          <div><i class="fas fa-users me-2"></i>Associados</div>
+          <i class="fas fa-chevron-down ms-auto arrow-icon"></i>
         </a>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white p-3 border-bottom border-secondary" data-section="add-product">
-          <i class="fas fa-plus-circle me-2"></i>Adicionar Produto
-        </a>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white p-3 border-bottom border-secondary" data-section="associates">
-          <i class="fas fa-users me-2"></i>Associados
-        </a>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white p-3 border-bottom border-secondary" data-section="register-associate">
-            <i class="fas fa-user-plus me-2"></i>Cadastrar Associado
-        </a>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white p-3 border-bottom border-secondary" data-section="suppliers">
-          <i class="fas fa-truck me-2"></i>Fornecedores
-        </a>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white p-3 border-bottom border-secondary" data-section="add-supplier">
-          <i class="fas fa-handshake me-2"></i>Adicionar Fornecedor
-        </a>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white p-3 border-bottom border-secondary" data-section="reports">
-          <i class="fas fa-chart-line me-2"></i>Relatórios
-        </a>
-        <a href="#" class="list-group-item list-group-item-action bg-dark text-white p-3 border-bottom border-secondary" id="logout-button">
-          <i class="fas fa-sign-out-alt me-2"></i>Sair
-        </a>
+        <div class="collapse" id="associatesSubmenu">
+          <a href="#" class="list-group-item list-group-item-action bg-dark text-white ps-5" data-target="cadastro-associados"><i class="fas fa-user-plus me-2"></i>Cadastro</a>
+          <a href="#" class="list-group-item list-group-item-action bg-dark text-white ps-5" data-target="em-admissao"><i class="fas fa-hourglass-half me-2"></i>Em Admissão</a>
+          <a href="#" class="list-group-item list-group-item-action bg-dark text-white ps-5" data-target="admitidos"><i class="fas fa-user-check me-2"></i>Admitidos</a>
+        </div>
+        <a href="#" class="list-group-item list-group-item-action bg-dark text-white" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
       </div>
     </div>
 
@@ -51,392 +44,377 @@
         <button class="btn btn-primary" id="menu-toggle">
           <i class="fas fa-bars"></i>
         </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          </div>
+        <div class="ms-auto me-3">
+          <span class="navbar-text text-dark">
+            Bem-vindo(a) ao Dashboard!
+          </span>
+        </div>
       </nav>
 
-      <div class="container-fluid p-4" id="dashboard-container">
-        <div id="home-section" class="content-section active">
-          <h2 class="mb-4 text-dark">Bem-vindo(a) ao Dashboard da Cannapis!</h2>
-          <p class="text-muted">Utilize o menu lateral para navegar entre as seções.</p>
-          <div class="row mt-5">
-            <div class="col-md-4 mb-4">
-              <div class="card shadow-sm h-100">
-                <div class="card-body">
-                  <h5 class="card-title text-dark"><i class="fas fa-box me-2"></i>Estoque</h5>
-                  <p class="card-text text-muted">Gerencie seus produtos, visualize o estoque e adicione novos itens.</p>
-                  <a href="#" class="btn btn-outline-dark" data-section="products">Ir para Estoque</a>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 mb-4">
-              <div class="card shadow-sm h-100">
-                <div class="card-body">
-                  <h5 class="card-title text-dark"><i class="fas fa-users me-2"></i>Associados</h5>
-                  <p class="card-text text-muted">Acompanhe os associados, seus dados e status.</p>
-                  <a href="#" class="btn btn-outline-dark" data-section="associates">Ver Associados</a>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 mb-4">
-              <div class="card shadow-sm h-100">
-                <div class="card-body">
-                  <h5 class="card-title text-dark"><i class="fas fa-chart-line me-2"></i>Relatórios</h5>
-                  <p class="card-text text-muted">Acesse relatórios de vendas, estoque e associados.</p>
-                  <a href="#" class="btn btn-outline-dark" data-section="reports">Gerar Relatórios</a>
-                </div>
-              </div>
-            </div>
+      <div class="container-fluid mt-4" id="dashboard-container">
+        <div id="home" class="content-section">
+          <h3 class="mb-4 text-dark">Visão Geral</h3>
+          <div class="alert alert-info" role="alert">
+            Use o menu lateral para navegar entre as seções de cadastro e listagem.
+          </div>
+          <div class="alert alert-secondary" role="alert">
+            Geração de relatórios diversos. (Em desenvolvimento)
           </div>
         </div>
 
-        <div id="products-section" class="content-section" style="display:none;">
-          <h2 class="mb-4 text-dark">Estoque de Produtos</h2>
-          <div class="d-flex justify-content-between mb-3">
-            <input type="text" id="search-product" class="form-control me-2" placeholder="Pesquisar produto..." style="max-width: 300px;">
-            <button class="btn btn-primary" data-section="add-product">
-              <i class="fas fa-plus-circle me-2"></i>Adicionar Novo Produto
-            </button>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-hover table-bordered bg-light text-dark">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Nome</th>
-                  <th>Tipo</th>
-                  <th>Fornecedor</th>
-                  <th>Quantidade</th>
-                  <th>Preço de Compra</th>
-                  <th>Preço de Venda</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="products-table-body">
-                </tbody>
-            </table>
-          </div>
-          <button class="btn btn-success mt-3" onclick="generateProductReport()">Gerar Relatório de Produtos</button>
-        </div>
-
-        <div id="add-product-section" class="content-section" style="display:none;">
-          <h2 class="mb-4 text-dark">Adicionar Novo Produto</h2>
-          <form id="add-product-form">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="product-name" class="form-label text-dark">Nome do Produto:</label>
-                <input type="text" class="form-control" id="product-name" required>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="product-type" class="form-label text-dark">Tipo de Produto:</label>
-                <select class="form-select" id="product-type" required>
+        <div id="cadastro-produtos" class="content-section" style="display: none;">
+          <h3 class="mb-4 text-dark">Cadastro de Produtos</h3>
+          <div class="card p-4 shadow-sm bg-white">
+            <form id="product-form">
+              <h5 class="text-dark mb-4">Dados do Produto</h5>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="product-type" class="form-label">Tipo de Produto</label>
+                  <select class="form-select" id="product-type" required>
+                    <option value="">Selecione ou Cadastre</option>
                   </select>
-                <button type="button" class="btn btn-sm btn-outline-dark mt-2" data-bs-toggle="modal" data-bs-target="#addProductTypeModal">Adicionar Tipo</button>
+                  <button type="button" class="btn btn-link p-0 mt-1" id="new-product-btn">
+                    <small>+ Cadastrar novo tipo de produto</small>
+                  </button>
+                </div>
+                <div class="col-md-6">
+                  <label for="product-name" class="form-label">Nome do Produto</label>
+                  <input type="text" class="form-control" id="product-name" required>
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="product-supplier" class="form-label text-dark">Fornecedor:</label>
-                <select class="form-select" id="product-supplier" required>
-                  </select>
-                <button type="button" class="btn btn-sm btn-outline-dark mt-2" data-bs-toggle="modal" data-bs-target="#addSupplierModal">Adicionar Fornecedor</button>
+              <div class="mb-3">
+                <label for="product-description-detailed" class="form-label">Descrição Detalhada</label>
+                <textarea class="form-control" id="product-description-detailed" rows="3"></textarea>
               </div>
-              <div class="col-md-6 mb-3">
-                <label for="product-quantity" class="form-label text-dark">Quantidade:</label>
-                <input type="number" class="form-control" id="product-quantity" min="0" required>
+              <div class="mb-3">
+                <label for="product-description-short" class="form-label">Descrição Resumida</label>
+                <input type="text" class="form-control" id="product-description-short">
               </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="purchase-price" class="form-label text-dark">Preço de Compra (R$):</label>
-                <input type="number" class="form-control" id="purchase-price" step="0.01" required>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label d-block">Status do Produto</label>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="product-status" id="status-active" value="ativo" checked>
+                    <label class="form-check-label" for="status-active">Ativo</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="product-status" id="status-inactive" value="inativo">
+                    <label class="form-check-label" for="status-inactive">Inativo</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check form-check-inline mt-4">
+                    <input class="form-check-input" type="checkbox" id="product-online">
+                    <label class="form-check-label" for="product-online">Disponível Online</label>
+                  </div>
+                  <div class="form-check form-check-inline mt-4">
+                    <input class="form-check-input" type="checkbox" id="product-restricted">
+                    <label class="form-check-label" for="product-restricted">Acesso Restrito</label>
+                  </div>
+                </div>
               </div>
-              <div class="col-md-6 mb-3">
-                <label for="sale-price" class="form-label text-dark">Preço de Venda (R$):</label>
-                <input type="number" class="form-control" id="sale-price" step="0.01" required>
+              <div class="mb-3">
+                <label for="product-images" class="form-label">Imagens do Produto</label>
+                <input class="form-control" type="file" id="product-images" multiple accept="image/*">
+                <small class="form-text text-muted">Selecione uma ou mais imagens para o produto.</small>
               </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Salvar Produto</button>
-          </form>
-        </div>
+              <div class="mb-3">
+                <label for="supplier" class="form-label">Fornecedor</label>
+                <select class="form-select" id="supplier" required>
+                  <option value="">Selecione ou Cadastre</option>
+                </select>
+                <button type="button" class="btn btn-link p-0 mt-1" id="new-supplier-btn">
+                  <small>+ Cadastrar novo fornecedor</small>
+                </button>
+              </div>
 
-        <div id="associates-section" class="content-section" style="display:none;">
-          <h2 class="mb-4 text-dark">Associados</h2>
-          <div class="d-flex justify-content-between mb-3">
-            <input type="text" id="search-associate" class="form-control me-2" placeholder="Pesquisar associado..." style="max-width: 300px;">
-            <button class="btn btn-primary" data-section="register-associate">
-              <i class="fas fa-user-plus me-2"></i>Cadastrar Novo Associado
-            </button>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-hover table-bordered bg-light text-dark">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Nome Completo</th>
-                  <th>CPF</th>
-                  <th>Telefone</th>
-                  <th>Tipo de Associado</th>
-                  <th>Status</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="associates-table-body">
-                </tbody>
-            </table>
-          </div>
-          <button class="btn btn-success mt-3" onclick="generateAssociateReport()">Gerar Relatório de Associados</button>
-        </div>
+              <h5 class="text-dark mt-4 mb-3">Atributos Dinâmicos</h5>
+              <div id="dynamic-attributes-container">
+                </div>
+              <button type="button" class="btn btn-secondary btn-sm mb-3" onclick="addAttributeField()">+ Adicionar Atributo</button>
 
-        <div id="register-associate-section" class="content-section" style="display:none;">
-            <h2 class="mb-4 text-dark">Cadastrar Associado</h2>
-            <form id="register-associate-form">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="associate-full-name" class="form-label text-dark">Nome Completo:</label>
-                        <input type="text" class="form-control" id="associate-full-name" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="associate-cpf" class="form-label text-dark">CPF:</label>
-                        <input type="text" class="form-control" id="associate-cpf" required>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="associate-phone" class="form-label text-dark">Telefone:</label>
-                        <input type="text" class="form-control" id="associate-phone">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="associate-dob" class="form-label text-dark">Data de Nascimento:</label>
-                        <input type="date" class="form-control" id="associate-dob">
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="associate-address" class="form-label text-dark">Endereço Completo:</label>
-                    <input type="text" class="form-control" id="associate-address">
-                </div>
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label for="associate-number" class="form-label text-dark">Número:</label>
-                        <input type="text" class="form-control" id="associate-number">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="associate-cep" class="form-label text-dark">CEP:</label>
-                        <input type="text" class="form-control" id="associate-cep">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="associate-city" class="form-label text-dark">Cidade:</label>
-                        <input type="text" class="form-control" id="associate-city">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="associate-state" class="form-label text-dark">Estado:</label>
-                        <input type="text" class="form-control" id="associate-state">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="associate-country" class="form-label text-dark">País:</label>
-                        <input type="text" class="form-control" id="associate-country" value="Brasil" readonly>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="associate-email" class="form-label text-dark">Email:</label>
-                        <input type="email" class="form-control" id="associate-email">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="associate-type" class="form-label text-dark">Tipo de Associado:</label>
-                        <select class="form-select" id="associate-type" required>
-                            </select>
-                        <button type="button" class="btn btn-sm btn-outline-dark mt-2" data-bs-toggle="modal" data-bs-target="#addAssociateTypeModal">Adicionar Tipo de Associado</button>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="associate-status" class="form-label text-dark">Status do Associado:</label>
-                        <select class="form-select" id="associate-status" required>
-                            <option value="Ativo">Ativo</option>
-                            <option value="Inativo">Inativo</option>
-                            <option value="Pendente">Pendente</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label for="associate-document-upload" class="form-label text-dark">Adicionar Foto/Documento:</label>
-                    <input type="file" class="form-control" id="associate-document-upload" accept="image/*,.pdf">
-                    <small class="form-text text-muted">Carregue fotos ou documentos relevantes do associado (ex: RG, comprovante de residência).</small>
-                    <div id="uploaded-documents-preview" class="mt-2"></div>
-                </div>
-                <button type="submit" class="btn btn-primary">Salvar Associado</button>
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Salvar Produto</button>
+              </div>
             </form>
+          </div>
         </div>
 
-
-        <div id="suppliers-section" class="content-section" style="display:none;">
-          <h2 class="mb-4 text-dark">Fornecedores</h2>
-          <div class="d-flex justify-content-between mb-3">
-            <input type="text" id="search-supplier" class="form-control me-2" placeholder="Pesquisar fornecedor..." style="max-width: 300px;">
-            <button class="btn btn-primary" data-section="add-supplier">
-              <i class="fas fa-handshake me-2"></i>Adicionar Novo Fornecedor
-            </button>
+        <div id="listar-produtos" class="content-section" style="display: none;">
+          <h3 class="mb-4 text-dark">Listar Produtos</h3>
+          <div class="card p-4 shadow-sm bg-white">
+            <button class="btn btn-dark mb-3" id="generate-pdf-btn">Gerar PDF de Produtos</button>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Status</th>
+                    <th>Online</th>
+                    <th>Restrito</th>
+                    <th>Fornecedor</th>
+                    <th>Descrição Resumida</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="products-table-body">
+                  </tbody>
+              </table>
+            </div>
           </div>
-          <div class="table-responsive">
-            <table class="table table-hover table-bordered bg-light text-dark">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Nome do Fornecedor</th>
-                  <th>Contato</th>
-                  <th>Telefone</th>
-                  <th>Email</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody id="suppliers-table-body">
-                </tbody>
-            </table>
-          </div>
-          <button class="btn btn-success mt-3" onclick="generateSupplierReport()">Gerar Relatório de Fornecedores</button>
         </div>
 
-        <div id="add-supplier-section" class="content-section" style="display:none;">
-          <h2 class="mb-4 text-dark">Adicionar Novo Fornecedor</h2>
-          <form id="add-supplier-form">
-            <div class="mb-3">
-              <label for="supplier-name" class="form-label text-dark">Nome do Fornecedor:</label>
-              <input type="text" class="form-control" id="supplier-name" required>
+        <div id="cadastro-associados" class="content-section" style="display: none;">
+          <h3 class="mb-4 text-dark">Cadastro de Associados</h3>
+          <form id="associate-form">
+            <div class="card p-4 shadow-sm bg-white mb-4">
+              <h5 class="text-dark mb-4"><i class="fas fa-user me-2"></i>Dados Pessoais</h5>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="associate-full-name" class="form-label">Nome Completo</label>
+                  <input type="text" class="form-control" id="associate-full-name" required>
+                </div>
+                <div class="col-md-3">
+                  <label for="associate-cpf" class="form-label">CPF</label>
+                  <input type="text" class="form-control" id="associate-cpf" required placeholder="000.000.000-00">
+                </div>
+                <div class="col-md-3">
+                  <label for="associate-rg" class="form-label">RG</label>
+                  <input type="text" class="form-control" id="associate-rg" placeholder="00.000.000-0">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="associate-dob" class="form-label">Data de Nascimento</label>
+                  <input type="date" class="form-control" id="associate-dob" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label d-block">Gênero</label>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="associate-gender" id="gender-male" value="Masculino" checked>
+                    <label class="form-check-label" for="gender-male">Masculino</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="associate-gender" id="gender-female" value="Feminino">
+                    <label class="form-check-label" for="gender-female">Feminino</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="associate-gender" id="gender-other" value="Outro">
+                    <label class="form-check-label" for="gender-other">Outro</label>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="mb-3">
-              <label for="supplier-contact-person" class="form-label text-dark">Pessoa de Contato:</label>
-              <input type="text" class="form-control" id="supplier-contact-person">
+
+            <div class="card p-4 shadow-sm bg-white mb-4">
+              <h5 class="text-dark mb-4"><i class="fas fa-address-book me-2"></i>Contato</h5>
+              <div class="row mb-3">
+                <div class="col-md-9">
+                  <label for="associate-address" class="form-label">Endereço Completo</label>
+                  <input type="text" class="form-control" id="associate-address" placeholder="Rua, Número, Bairro, Cidade, Estado">
+                </div>
+                <div class="col-md-3">
+                  <label for="associate-cep" class="form-label">CEP</label>
+                  <input type="text" class="form-control" id="associate-cep" placeholder="00000-000">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="associate-phone" class="form-label">Telefone</label>
+                  <input type="tel" class="form-control" id="associate-phone" required placeholder="(XX) XXXXX-XXXX">
+                </div>
+                <div class="col-md-6">
+                  <label for="associate-email" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="associate-email" placeholder="email@exemplo.com">
+                </div>
+              </div>
             </div>
-            <div class="mb-3">
-              <label for="supplier-phone" class="form-label text-dark">Telefone:</label>
-              <input type="text" class="form-control" id="supplier-phone">
+
+            <div class="card p-4 shadow-sm bg-white mb-4">
+              <h5 class="text-dark mb-4"><i class="fas fa-handshake me-2"></i>Dados da Associação</h5>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="associate-type" class="form-label">Tipo de Associado</label>
+                  <select class="form-select" id="associate-type" required>
+                    <option value="">Selecione ou Cadastre</option>
+                  </select>
+                  <button type="button" class="btn btn-link p-0 mt-1" id="new-associate-type-btn">
+                    <small>+ Cadastrar novo tipo de associado</small>
+                  </button>
+                </div>
+                <div class="col-md-6">
+                  <label for="associate-association-date" class="form-label">Data de Associação</label>
+                  <input type="date" class="form-control" id="associate-association-date" required>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label d-block">Status do Associado</label>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="associate-status" id="associate-status-ativo" value="ativo" checked>
+                  <label class="form-check-label" for="associate-status-ativo">Ativo</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="associate-status" id="associate-status-em-admissao" value="Em Admissão">
+                  <label class="form-check-label" for="associate-status-em-admissao">Em Admissão</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="associate-status" id="associate-status-inativo" value="inativo">
+                  <label class="form-check-label" for="associate-status-inativo">Inativo</label>
+                </div>
+              </div>
             </div>
-            <div class="mb-3">
-              <label for="supplier-email" class="form-label text-dark">Email:</label>
-              <input type="email" class="form-control" id="supplier-email">
+
+            <div class="card p-4 shadow-sm bg-white mb-4">
+              <h5 class="text-dark mb-4"><i class="fas fa-heartbeat me-2"></i>Dados de Saúde</h5>
+              <div class="mb-3">
+                <label for="associate-medical-conditions" class="form-label">Condições Médicas Relevantes</label>
+                <textarea class="form-control" id="associate-medical-conditions" rows="3" placeholder="Alergias, doenças crônicas, medicações em uso..."></textarea>
+              </div>
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="associate-medical-treatment">
+                <label class="form-check-label" for="associate-medical-treatment">
+                  Recebe tratamento médico atualmente?
+                </label>
+              </div>
             </div>
-            <div class="mb-3">
-              <label for="supplier-address" class="form-label text-dark">Endereço:</label>
-              <input type="text" class="form-control" id="supplier-address">
+
+            <div class="card p-4 shadow-sm bg-white mb-4">
+              <h5 class="text-dark mb-4"><i class="fas fa-seedling me-2"></i>Dados de Cultivo (Se Aplicável)</h5>
+              <div class="mb-3">
+                <label for="associate-cultivation-experience" class="form-label">Experiência com Cultivo de Cannabis</label>
+                <textarea class="form-control" id="associate-cultivation-experience" rows="3" placeholder="Descreva sua experiência, se houver."></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="associate-cultivation-method" class="form-label">Metodologia de Cultivo Preferida/Conhecida</label>
+                <input type="text" class="form-control" id="associate-cultivation-method" placeholder="Ex: Indoor, Outdoor, Hidroponia, Orgânico">
+              </div>
             </div>
-            <button type="submit" class="btn btn-primary">Salvar Fornecedor</button>
+
+            <div class="card p-4 shadow-sm bg-white mb-4">
+              <h5 class="text-dark mb-4"><i class="fas fa-comment-dots me-2"></i>Observações Adicionais</h5>
+              <div class="mb-3">
+                <label for="associate-observations" class="form-label">Outras Observações</label>
+                <textarea class="form-control" id="associate-observations" rows="4" placeholder="Adicione quaisquer outras informações relevantes..."></textarea>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary btn-lg">Salvar Associado</button>
+            </div>
           </form>
         </div>
 
-        <div id="reports-section" class="content-section" style="display:none;">
-          <h2 class="mb-4 text-dark">Relatórios</h2>
-          <p class="text-muted">Selecione o tipo de relatório que deseja gerar:</p>
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <div class="card shadow-sm h-100">
-                <div class="card-body">
-                  <h5 class="card-title text-dark"><i class="fas fa-box me-2"></i>Relatório de Produtos</h5>
-                  <p class="card-text text-muted">Gera um relatório PDF com a lista de todos os produtos em estoque.</p>
-                  <button class="btn btn-outline-dark" onclick="generateProductReport()">Gerar PDF</button>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 mb-3">
-              <div class="card shadow-sm h-100">
-                <div class="card-body">
-                  <h5 class="card-title text-dark"><i class="fas fa-users me-2"></i>Relatório de Associados</h5>
-                  <p class="card-text text-muted">Gera um relatório PDF com a lista de todos os associados cadastrados.</p>
-                  <button class="btn btn-outline-dark" onclick="generateAssociateReport()">Gerar PDF</button>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 mb-3">
-              <div class="card shadow-sm h-100">
-                <div class="card-body">
-                  <h5 class="card-title text-dark"><i class="fas fa-truck me-2"></i>Relatório de Fornecedores</h5>
-                  <p class="card-text text-muted">Gera um relatório PDF com a lista de todos os fornecedores cadastrados.</p>
-                  <button class="btn btn-outline-dark" onclick="generateSupplierReport()">Gerar PDF</button>
-                </div>
-              </div>
+        <div id="em-admissao" class="content-section" style="display: none;">
+          <h3 class="mb-4 text-dark">Associados em Admissão</h3>
+          <div class="card p-4 shadow-sm bg-white">
+            <p class="text-muted">Lista de associados com status "Em Admissão".</p>
+             <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Nome Completo</th>
+                    <th>CPF</th>
+                    <th>Telefone</th>
+                    <th>Tipo de Associado</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="associates-em-admissao-table-body">
+                  </tbody>
+              </table>
             </div>
           </div>
         </div>
 
-      </div>
-    </div>
-  </div>
+        <div id="admitidos" class="content-section" style="display: none;">
+          <h3 class="mb-4 text-dark">Associados Admitidos</h3>
+          <div class="card p-4 shadow-sm bg-white">
+            <p class="text-muted">Lista de associados com status "Admitido" (Ativo).</p>
+             <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Nome Completo</th>
+                    <th>CPF</th>
+                    <th>Telefone</th>
+                    <th>Tipo de Associado</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="associates-admitidos-table-body">
+                  </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
 
-  <div class="modal fade" id="addProductTypeModal" tabindex="-1" aria-labelledby="addProductTypeModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title" id="addProductTypeModalLabel">Adicionar Novo Tipo de Produto</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="new-product-type-name" class="form-label text-dark">Nome do Tipo de Produto:</label>
-            <input type="text" class="form-control" id="new-product-type-name" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-          <button type="button" class="btn btn-primary" id="save-product-type">Salvar Tipo</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="modal fade" id="addSupplierModal" tabindex="-1" aria-labelledby="addSupplierModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title" id="addSupplierModalLabel">Adicionar Novo Fornecedor</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="new-supplier-name" class="form-label text-dark">Nome do Fornecedor:</label>
-            <input type="text" class="form-control" id="new-supplier-name" required>
-          </div>
-          <div class="mb-3">
-            <label for="new-supplier-contact" class="form-label text-dark">Pessoa de Contato:</label>
-            <input type="text" class="form-control" id="new-supplier-contact">
-          </div>
-          <div class="mb-3">
-            <label for="new-supplier-phone" class="form-label text-dark">Telefone:</label>
-            <input type="text" class="form-control" id="new-supplier-phone">
-          </div>
-          <div class="mb-3">
-            <label for="new-supplier-email" class="form-label text-dark">Email:</label>
-            <input type="email" class="form-control" id="new-supplier-email">
-          </div>
-          <div class="mb-3">
-            <label for="new-supplier-address" class="form-label text-dark">Endereço:</label>
-            <input type="text" class="form-control" id="new-supplier-address">
+        <div class="modal fade" id="new-product-type-modal" tabindex="-1" aria-labelledby="newProductTypeModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="newProductTypeModalLabel">Cadastrar Novo Tipo de Produto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="new-product-type-input" class="form-label">Nome do Tipo de Produto</label>
+                  <input type="text" class="form-control" id="new-product-type-input" required>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="save-new-product-type-btn">Salvar</button>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-          <button type="button" class="btn btn-primary" id="save-supplier">Salvar Fornecedor</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="modal fade" id="addAssociateTypeModal" tabindex="-1" aria-labelledby="addAssociateTypeModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title" id="addAssociateTypeModalLabel">Adicionar Novo Tipo de Associado</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="new-associate-type-name" class="form-label text-dark">Nome do Tipo de Associado:</label>
-            <input type="text" class="form-control" id="new-associate-type-name" required>
+        <div class="modal fade" id="new-supplier-modal" tabindex="-1" aria-labelledby="newSupplierModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="newSupplierModalLabel">Cadastrar Novo Fornecedor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="new-supplier-input" class="form-label">Nome do Fornecedor</label>
+                  <input type="text" class="form-control" id="new-supplier-input" required>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="save-new-supplier-btn">Salvar</button>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-          <button type="button" class="btn btn-primary" id="save-associate-type">Salvar Tipo</button>
+
+        <div class="modal fade" id="new-associate-type-modal" tabindex="-1" aria-labelledby="newAssociateTypeModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="newAssociateTypeModalLabel">Cadastrar Novo Tipo de Associado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="new-associate-type-input" class="form-label">Nome do Tipo de Associado</label>
+                  <input type="text" class="form-control" id="new-associate-type-input" required>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="save-new-associate-type-btn">Salvar</button>
+              </div>
+            </div>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -452,55 +430,18 @@
   <script>
     // Configurações do Firebase - PREENCHA COM SEUS DADOS REAIS DO CONSOLE DO FIREBASE!
     const firebaseConfig = {
-      apiKey: "SUA_CHAVE_DE_API_AQUI", // Exemplo: "AIzaSyC0dE_YoUr_FiReBaSe_KeY"
-      authDomain: "SEU_AUTH_DOMAIN_AQUI", // Exemplo: "your-project-id.firebaseapp.com"
-      projectId: "SEU_PROJECT_ID_AQUI", // Exemplo: "your-project-id"
-      storageBucket: "SEU_STORAGE_BUCKET_AQUI", // Exemplo: "your-project-id.appspot.com"
-      messagingSenderId: "SEU_MESSAGING_SENDER_ID_AQUI", // Exemplo: "1234567890"
-      appId: "SEU_APP_ID_AQUI" // Exemplo: "1:1234567890:web:abcdef1234567890"
+      apiKey: "SUA_CHAVE_DE_API_AQUI", // Exemplo: "AIzaSyB..."
+      authDomain: "cannapis-68e37.firebaseapp.com",
+      projectId: "cannapis-68e37",
+      storageBucket: "cannapis-68e37.appspot.com",
+      messagingSenderId: "618285951466",
+      appId: "SEU_APP_ID_AQUI" // Exemplo: "1:234567890:web:abcdef1234567890abcdef"
     };
 
-    // Inicializa o Firebase
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
-
-    // Obtém uma referência para o Firestore
     const db = firebase.firestore();
     const storage = firebase.storage();
-
-    // Adiciona listener para o menu toggle
-    document.getElementById("menu-toggle").addEventListener("click", function () {
-      document.getElementById("wrapper").classList.toggle("toggled");
-    });
-
-    // Função para mostrar a seção ativa e esconder as outras
-    document.querySelectorAll('.list-group-item-action').forEach(item => {
-      item.addEventListener('click', function (e) {
-        e.preventDefault();
-        const sectionToShow = this.dataset.section;
-
-        document.querySelectorAll('.content-section').forEach(section => {
-          section.style.display = 'none';
-        });
-
-        document.getElementById(`${sectionToShow}-section`).style.display = 'block';
-        lastActiveSection = sectionToShow; // Atualiza a última seção ativa
-
-        // Carrega dados específicos da seção, se houver
-        if (sectionToShow === 'products') {
-          loadProducts();
-        } else if (sectionToShow === 'associates') {
-          loadAssociates();
-        } else if (sectionToShow === 'suppliers') {
-          loadSuppliersTable();
-        } else if (sectionToShow === 'add-product') {
-          loadProductTypes(); // Recarrega para o caso de ter adicionado novo tipo
-          loadSuppliers(); // Recarrega para o caso de ter adicionado novo fornecedor
-        } else if (sectionToShow === 'register-associate') {
-          loadAssociateTypes(); // Recarrega para o caso de ter adicionado novo tipo de associado
-        }
-      });
-    });
-
   </script>
   <script src="script.js"></script>
 </body>

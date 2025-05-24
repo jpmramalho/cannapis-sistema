@@ -29,418 +29,501 @@ document.addEventListener('DOMContentLoaded', async function () {
   if (document.getElementById('product-type')) { // Verifica se estamos na página do dashboard
     await loadProductTypes();
     await loadSuppliers();
-    await loadAssociateTypes(); // Carrega tipos de associado
+    await loadAssociateTypes();
   }
 
   if (document.getElementById('dashboard-container')) {
-    // Esconde todas as seções e mostra a inicial (home)
+    // Esconder todas as seções exceto a home ao carregar
     document.querySelectorAll('.content-section').forEach(section => {
-      section.style.display = 'none';
+      if (section.id !== 'home') {
+        section.style.display = 'none';
+      }
     });
-    document.getElementById('home-section').style.display = 'block';
 
-    // Event listeners para os itens do menu lateral
-    document.querySelectorAll('.list-group-item-action').forEach(item => {
-      item.addEventListener('click', function (e) {
+    document.getElementById('sidebar-wrapper').addEventListener('click', async function (e) {
+      const target = e.target.closest('.list-group-item');
+      if (target && target.dataset.target) {
         e.preventDefault();
-        const sectionToShow = this.dataset.section;
+        const targetSectionId = target.dataset.target;
 
-        // Esconde a seção ativa anterior
-        document.getElementById(`${lastActiveSection}-section`).style.display = 'none';
+        // Remove a classe 'active' de todos os itens do menu
+        document.querySelectorAll('.list-group-item').forEach(item => {
+          item.classList.remove('active');
+        });
 
-        // Mostra a nova seção
-        document.getElementById(`${sectionToShow}-section`).style.display = 'block';
-        lastActiveSection = sectionToShow; // Atualiza a última seção ativa
-
-        // Carrega dados específicos da seção, se houver
-        if (sectionToShow === 'products') {
-          loadProducts();
-        } else if (sectionToShow === 'associates') {
-          loadAssociates();
-        } else if (sectionToShow === 'suppliers') {
-          loadSuppliersTable(); // Certifique-se de que esta função existe para carregar a tabela de fornecedores
-        } else if (sectionToShow === 'add-product') {
-          loadProductTypes(); // Recarrega para o caso de ter adicionado novo tipo
-          loadSuppliers(); // Recarrega para o caso de ter adicionado novo fornecedor
-        } else if (sectionToShow === 'register-associate') {
-          loadAssociateTypes(); // Recarrega para o caso de ter adicionado novo tipo de associado
+        // Adiciona a classe 'active' ao item clicado (se não for um item pai de colapso)
+        if (!target.dataset.bsToggle) { // Garante que não adiciona 'active' ao item pai (Produtos, Associados)
+          target.classList.add('active');
         }
-      });
+
+        showSection(targetSectionId); // Mostra a seção
+
+        // Ações específicas ao abrir certas seções
+        if (targetSectionId === 'cadastro-produtos') {
+          await loadProductTypes();
+          await loadSuppliers();
+        } else if (targetSectionId === 'listar-produtos') {
+          await loadProductsToList();
+        } else if (targetSectionId === 'cadastro-associados') {
+          await loadAssociateTypes();
+          // Limpa o formulário quando entra na tela de cadastro para um novo registro
+          const associateForm = document.getElementById('associate-form');
+          if (associateForm) {
+            associateForm.reset();
+            delete associateForm.dataset.associateId; // Remove ID de edição
+          }
+        } else if (targetSectionId === 'em-admissao') {
+          // Lógica para carregar associados "Em Admissão"
+          await loadAssociatesFilteredToList('Em Admissão', 'associates-em-admissao-table-body');
+        } else if (targetSectionId === 'admitidos') {
+          // Lógica para carregar associados "Admitidos" (Ativos)
+          await loadAssociatesFilteredToList('ativo', 'associates-admitidos-table-body');
+        }
+      }
     });
 
-    // Logout button functionality
-    document.getElementById('logout-button').addEventListener('click', function (e) {
+    // Toggle do sidebar
+    document.getElementById('menu-toggle').addEventListener('click', function (e) {
       e.preventDefault();
-      window.location.href = 'index.html'; // Redireciona para a página de login
+      document.getElementById('wrapper').classList.toggle('toggled');
     });
 
-    // Load initial data for home if needed, or simply display home section
-    // For now, it's just showing the home section by default
-  }
+    // Logout
+    document.getElementById('logout-button').addEventListener('click', function () {
+      if (confirm('Tem certeza que deseja sair?')) {
+        window.location.href = 'index.html';
+      }
+    });
 
-  // Event listener para o formulário de adicionar produto
-  const addProductForm = document.getElementById('add-product-form');
-  if (addProductForm) {
-    addProductForm.addEventListener('submit', addProduct);
-  }
+    // Event listeners para os botões e formulários
+    const newProductBtn = document.getElementById('new-product-btn');
+    if (newProductBtn) {
+      newProductBtn.addEventListener('click', openNewProductTypeModal);
+    }
 
-  // Event listener para o formulário de adicionar fornecedor
-  const addSupplierForm = document.getElementById('add-supplier-form');
-  if (addSupplierForm) {
-    addSupplierForm.addEventListener('submit', addSupplier);
-  }
+    const saveNewProductTypeBtn = document.getElementById('save-new-product-type-btn');
+    if (saveNewProductTypeBtn) {
+      saveNewProductTypeBtn.addEventListener('click', saveNewProductTypeToFirestore);
+    }
 
-  // Event listener para o formulário de cadastrar associado
-  const registerAssociateForm = document.getElementById('register-associate-form');
-  if (registerAssociateForm) {
-      registerAssociateForm.addEventListener('submit', registerAssociate);
-  }
+    const productForm = document.getElementById('product-form');
+    if (productForm) {
+      productForm.addEventListener('submit', handleProductFormSubmit);
+    }
 
-  // Event listener para o botão de salvar tipo de produto no modal
-  const saveProductTypeButton = document.getElementById('save-product-type');
-  if (saveProductTypeButton) {
-    saveProductTypeButton.addEventListener('click', addProductType);
-  }
+    const generatePdfBtn = document.getElementById('generate-pdf-btn');
+    if (generatePdfBtn) {
+      generatePdfBtn.addEventListener('click', generateProductsPdf);
+    }
 
-  // Event listener para o botão de salvar fornecedor no modal
-  const saveSupplierButton = document.getElementById('save-supplier');
-  if (saveSupplierButton) {
-    saveSupplierButton.addEventListener('click', addSupplierFromModal);
-  }
+    const associateForm = document.getElementById('associate-form');
+    if (associateForm) {
+      associateForm.addEventListener('submit', handleAssociateFormSubmit);
+    }
 
-  // Event listener para o botão de salvar tipo de associado no modal
-  const saveAssociateTypeButton = document.getElementById('save-associate-type');
-  if (saveAssociateTypeButton) {
-      saveAssociateTypeButton.addEventListener('click', addAssociateType);
-  }
+    const newAssociateTypeBtn = document.getElementById('new-associate-type-btn');
+    if (newAssociateTypeBtn) {
+      newAssociateTypeBtn.addEventListener('click', openNewAssociateTypeModal);
+    }
 
-  // Event listeners para pesquisa
-  const searchProductInput = document.getElementById('search-product');
-  if (searchProductInput) {
-    searchProductInput.addEventListener('keyup', filterProducts);
-  }
+    const saveNewAssociateTypeBtn = document.getElementById('save-new-associate-type-btn');
+    if (saveNewAssociateTypeBtn) {
+      saveNewAssociateTypeBtn.addEventListener('click', saveNewAssociateTypeToFirestore);
+    }
 
-  const searchAssociateInput = document.getElementById('search-associate');
-  if (searchAssociateInput) {
-    searchAssociateInput.addEventListener('keyup', filterAssociates);
-  }
+    const newSupplierBtn = document.getElementById('new-supplier-btn');
+    if (newSupplierBtn) {
+      newSupplierBtn.addEventListener('click', openNewSupplierModal);
+    }
 
-  const searchSupplierInput = document.getElementById('search-supplier');
-  if (searchSupplierInput) {
-    searchSupplierInput.addEventListener('keyup', filterSuppliers);
+    const saveNewSupplierBtn = document.getElementById('save-new-supplier-btn');
+    if (saveNewSupplierBtn) {
+      saveNewSupplierBtn.addEventListener('click', saveNewSupplierToFirestore);
+    }
   }
-
 });
 
-// Funções para carregar e adicionar dados (já existentes e novas)
 
-// Load Product Types
+function showSection(sectionId) {
+  // Esconder a seção atualmente ativa, se houver
+  const currentActiveSection = document.getElementById(lastActiveSection);
+  if (currentActiveSection) {
+    currentActiveSection.style.display = 'none';
+  }
+
+  // Mostrar a nova seção
+  const newActiveSection = document.getElementById(sectionId);
+  if (newActiveSection) {
+    newActiveSection.style.display = 'block';
+    lastActiveSection = sectionId; // Atualizar a última seção ativa
+  }
+}
+
+// Funções para Tipos de Produto
 async function loadProductTypes() {
   const productTypeSelect = document.getElementById('product-type');
   if (!productTypeSelect) return;
-  productTypeSelect.innerHTML = '<option value="">Selecione um tipo</option>';
+
+  productTypeSelect.innerHTML = '<option value="">Selecione ou Cadastre</option>'; // Limpa e adiciona opção padrão
+
   try {
-    const snapshot = await db.collection('productTypes').get();
-    snapshot.forEach(doc => {
+    const typesSnapshot = await db.collection('productTypes').orderBy('name').get();
+    typesSnapshot.forEach(doc => {
+      const type = doc.data();
       const option = document.createElement('option');
-      option.value = doc.id;
-      option.textContent = doc.data().name;
+      option.value = type.name;
+      option.textContent = type.name;
       productTypeSelect.appendChild(option);
     });
   } catch (error) {
-    console.error("Erro ao carregar tipos de produto:", error);
+    console.error("Erro ao carregar tipos de produto: ", error);
+    alert("Ocorreu um erro ao carregar os tipos de produto.");
   }
 }
 
-// Add Product Type
-async function addProductType() {
-  const newProductTypeName = document.getElementById('new-product-type-name').value;
-  if (newProductTypeName.trim() === '') {
-    alert('Por favor, insira um nome para o tipo de produto.');
+function openNewProductTypeModal() {
+  const newProductTypeModal = new bootstrap.Modal(document.getElementById('new-product-type-modal'));
+  newProductTypeModal.show();
+}
+
+async function saveNewProductTypeToFirestore() {
+  const newProductTypeInput = document.getElementById('new-product-type-input');
+  const newTypeName = newProductTypeInput.value.trim();
+
+  if (!newTypeName) {
+    alert('Por favor, insira um nome para o novo tipo de produto.');
     return;
   }
+
   try {
-    await db.collection('productTypes').add({ name: newProductTypeName });
-    alert('Tipo de produto adicionado com sucesso!');
-    document.getElementById('new-product-type-name').value = '';
-    const modal = bootstrap.Modal.getInstance(document.getElementById('addProductTypeModal'));
-    modal.hide();
-    loadProductTypes(); // Recarrega os tipos de produto no dropdown
+    // Verifica se o tipo já existe, agora de forma insensível a maiúsculas e minúsculas
+    const existingTypeSnapshot = await db.collection('productTypes').get();
+    const typeExists = existingTypeSnapshot.docs.some(doc => doc.data().name.toLowerCase() === newTypeName.toLowerCase());
+
+    if (typeExists) {
+      alert('Este tipo de produto já existe.');
+      return;
+    }
+
+    await db.collection('productTypes').add({ name: newTypeName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    alert(`Tipo "${newTypeName}" salvo com sucesso!`);
+    newProductTypeInput.value = ''; // Limpa o input
+    const newProductTypeModal = bootstrap.Modal.getInstance(document.getElementById('new-product-type-modal'));
+    newProductTypeModal.hide(); // Fecha o modal
+    await loadProductTypes(); // Recarrega os tipos na lista
   } catch (error) {
-    console.error("Erro ao adicionar tipo de produto:", error);
-    alert('Erro ao adicionar tipo de produto. Tente novamente.');
+    console.error("Erro ao salvar novo tipo de produto: ", error);
+    alert("Ocorreu um erro ao salvar o novo tipo de produto.");
   }
 }
 
-// Load Suppliers for dropdown
+// Funções para Fornecedores
 async function loadSuppliers() {
-  const productSupplierSelect = document.getElementById('product-supplier');
-  if (!productSupplierSelect) return;
-  productSupplierSelect.innerHTML = '<option value="">Selecione um fornecedor</option>';
-  try {
-    const snapshot = await db.collection('suppliers').get();
-    snapshot.forEach(doc => {
-      const option = document.createElement('option');
-      option.value = doc.id;
-      option.textContent = doc.data().name;
-      productSupplierSelect.appendChild(option);
-    });
-  } catch (error) {
-    console.error("Erro ao carregar fornecedores:", error);
-  }
-}
+  const supplierSelect = document.getElementById('supplier');
+  if (!supplierSelect) return;
 
-// Load Suppliers for table
-async function loadSuppliersTable() {
-  const suppliersTableBody = document.getElementById('suppliers-table-body');
-  if (!suppliersTableBody) return;
-  suppliersTableBody.innerHTML = ''; // Clear existing rows
+  supplierSelect.innerHTML = '<option value="">Selecione ou Cadastre</option>';
+
   try {
-    const snapshot = await db.collection('suppliers').get();
-    let index = 1;
-    snapshot.forEach(doc => {
+    const suppliersSnapshot = await db.collection('suppliers').orderBy('name').get();
+    suppliersSnapshot.forEach(doc => {
       const supplier = doc.data();
-      const row = suppliersTableBody.insertRow();
-      row.insertCell(0).textContent = index++;
-      row.insertCell(1).textContent = supplier.name;
-      row.insertCell(2).textContent = supplier.contactPerson || 'N/A';
-      row.insertCell(3).textContent = supplier.phone || 'N/A';
-      row.insertCell(4).textContent = supplier.email || 'N/A';
-
-      const actionsCell = row.insertCell(5);
-      actionsCell.innerHTML = `
-                <button class="btn btn-sm btn-info me-2" onclick="editSupplier('${doc.id}')" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteSupplier('${doc.id}')" data-bs-toggle="tooltip" data-bs-placement="top" title="Excluir">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-            `;
-    });
-    // Initialize tooltips for newly added buttons
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
+      const option = document.createElement('option');
+      option.value = supplier.name;
+      option.textContent = supplier.name;
+      supplierSelect.appendChild(option);
     });
   } catch (error) {
-    console.error("Erro ao carregar fornecedores para a tabela:", error);
+    console.error("Erro ao carregar fornecedores: ", error);
+    alert("Ocorreu um erro ao carregar os fornecedores.");
   }
 }
 
-// Add Supplier from modal
-async function addSupplierFromModal() {
-  const newSupplierName = document.getElementById('new-supplier-name').value;
-  const newSupplierContact = document.getElementById('new-supplier-contact').value;
-  const newSupplierPhone = document.getElementById('new-supplier-phone').value;
-  const newSupplierEmail = document.getElementById('new-supplier-email').value;
-  const newSupplierAddress = document.getElementById('new-supplier-address').value;
+function openNewSupplierModal() {
+  const newSupplierModal = new bootstrap.Modal(document.getElementById('new-supplier-modal'));
+  newSupplierModal.show();
+}
 
-  if (newSupplierName.trim() === '') {
-    alert('Por favor, insira o nome do fornecedor.');
+async function saveNewSupplierToFirestore() {
+  const newSupplierInput = document.getElementById('new-supplier-input');
+  const newSupplierName = newSupplierInput.value.trim();
+
+  if (!newSupplierName) {
+    alert('Por favor, insira um nome para o novo fornecedor.');
     return;
   }
 
   try {
-    await db.collection('suppliers').add({
-      name: newSupplierName,
-      contactPerson: newSupplierContact,
-      phone: newSupplierPhone,
-      email: newSupplierEmail,
-      address: newSupplierAddress,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    alert('Fornecedor adicionado com sucesso!');
-    document.getElementById('new-supplier-name').value = '';
-    document.getElementById('new-supplier-contact').value = '';
-    document.getElementById('new-supplier-phone').value = '';
-    document.getElementById('new-supplier-email').value = '';
-    document.getElementById('new-supplier-address').value = '';
-    const modal = bootstrap.Modal.getInstance(document.getElementById('addSupplierModal'));
-    modal.hide();
-    loadSuppliers(); // Recarrega os fornecedores no dropdown
-    loadSuppliersTable(); // Recarrega a tabela de fornecedores
+    // Verifica se o fornecedor já existe, insensível a maiúsculas e minúsculas
+    const existingSupplierSnapshot = await db.collection('suppliers').get();
+    const supplierExists = existingSupplierSnapshot.docs.some(doc => doc.data().name.toLowerCase() === newSupplierName.toLowerCase());
+
+    if (supplierExists) {
+      alert('Este fornecedor já existe.');
+      return;
+    }
+
+    await db.collection('suppliers').add({ name: newSupplierName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    alert(`Fornecedor "${newSupplierName}" salvo com sucesso!`);
+    newSupplierInput.value = '';
+    const newSupplierModal = bootstrap.Modal.getInstance(document.getElementById('new-supplier-modal'));
+    newSupplierModal.hide();
+    await loadSuppliers();
   } catch (error) {
-    console.error("Erro ao adicionar fornecedor:", error);
-    alert('Erro ao adicionar fornecedor. Tente novamente.');
+    console.error("Erro ao salvar novo fornecedor: ", error);
+    alert("Ocorreu um erro ao salvar o novo fornecedor.");
   }
 }
 
-// Add Product
-async function addProduct(e) {
-  e.preventDefault();
-  const productName = document.getElementById('product-name').value;
-  const productTypeId = document.getElementById('product-type').value;
-  const productSupplierId = document.getElementById('product-supplier').value;
-  const productQuantity = parseInt(document.getElementById('product-quantity').value);
-  const purchasePrice = parseFloat(document.getElementById('purchase-price').value);
-  const salePrice = parseFloat(document.getElementById('sale-price').value);
+// Funções para Tipos de Associado
+async function loadAssociateTypes() {
+  const associateTypeSelect = document.getElementById('associate-type');
+  if (!associateTypeSelect) return;
 
-  if (!productName || !productTypeId || !productSupplierId || isNaN(productQuantity) || isNaN(purchasePrice) || isNaN(salePrice)) {
-    alert('Por favor, preencha todos os campos obrigatórios.');
+  associateTypeSelect.innerHTML = '<option value="">Selecione ou Cadastre</option>';
+
+  try {
+    const typesSnapshot = await db.collection('associateTypes').orderBy('name').get();
+    typesSnapshot.forEach(doc => {
+      const type = doc.data();
+      const option = document.createElement('option');
+      option.value = type.name;
+      option.textContent = type.name;
+      associateTypeSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error("Erro ao carregar tipos de associado: ", error);
+    alert("Ocorreu um erro ao carregar os tipos de associado.");
+  }
+}
+
+function openNewAssociateTypeModal() {
+  const newAssociateTypeModal = new bootstrap.Modal(document.getElementById('new-associate-type-modal'));
+  newAssociateTypeModal.show();
+}
+
+async function saveNewAssociateTypeToFirestore() {
+  const newAssociateTypeInput = document.getElementById('new-associate-type-input');
+  const newTypeName = newAssociateTypeInput.value.trim();
+
+  if (!newTypeName) {
+    alert('Por favor, insira um nome para o novo tipo de associado.');
     return;
   }
 
   try {
-    // Buscar o nome do tipo de produto
-    const productTypeDoc = await db.collection('productTypes').doc(productTypeId).get();
-    const productTypeName = productTypeDoc.exists ? productTypeDoc.data().name : 'Desconhecido';
+    // Verifica se o tipo já existe, insensível a maiúsculas e minúsculas
+    const existingTypeSnapshot = await db.collection('associateTypes').get();
+    const typeExists = existingTypeSnapshot.docs.some(doc => doc.data().name.toLowerCase() === newTypeName.toLowerCase());
 
-    // Buscar o nome do fornecedor
-    const supplierDoc = await db.collection('suppliers').doc(productSupplierId).get();
-    const supplierName = supplierDoc.exists ? supplierDoc.data().name : 'Desconhecido';
+    if (typeExists) {
+      alert('Este tipo de associado já existe.');
+      return;
+    }
 
-    await db.collection('products').add({
-      name: productName,
-      typeId: productTypeId, // Armazena o ID
-      typeName: productTypeName, // Armazena o nome para facilitar consultas
-      supplierId: productSupplierId, // Armazena o ID
-      supplierName: supplierName, // Armazena o nome para facilitar consultas
-      quantity: productQuantity,
-      purchasePrice: purchasePrice,
-      salePrice: salePrice,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    alert('Produto adicionado com sucesso!');
-    document.getElementById('add-product-form').reset();
-    // Opcional: redirecionar ou recarregar a lista de produtos
-    loadProducts();
+    await db.collection('associateTypes').add({ name: newTypeName, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    alert(`Tipo "${newTypeName}" salvo com sucesso!`);
+    newAssociateTypeInput.value = '';
+    const newAssociateTypeModal = bootstrap.Modal.getInstance(document.getElementById('new-associate-type-modal'));
+    newAssociateTypeModal.hide();
+    await loadAssociateTypes();
   } catch (error) {
-    console.error("Erro ao adicionar produto:", error);
-    alert('Erro ao adicionar produto. Tente novamente.');
+    console.error("Erro ao salvar novo tipo de associado: ", error);
+    alert("Ocorreu um erro ao salvar o novo tipo de associado.");
   }
 }
 
-// Load Products
-async function loadProducts() {
+// Funções para Cadastro de Produtos
+async function handleProductFormSubmit(event) {
+  event.preventDefault();
+
+  const productForm = event.target;
+  const productId = productForm.dataset.productId; // Para edição
+
+  const productData = {
+    tipo: productForm.querySelector('#product-type').value,
+    nome: productForm.querySelector('#product-name').value.trim(),
+    descricaoDetalhada: productForm.querySelector('#product-description-detailed').value.trim(),
+    descricaoResumida: productForm.querySelector('#product-description-short').value.trim(),
+    status: productForm.querySelector('input[name="product-status"]:checked').value,
+    online: productForm.querySelector('#product-online').checked,
+    restrito: productForm.querySelector('#product-restricted').checked,
+    // Imagem será tratada separadamente
+    fornecedor: productForm.querySelector('#supplier').value,
+  };
+
+  // Coleta os atributos dinâmicos
+  const attributesContainer = document.getElementById('dynamic-attributes-container');
+  productData.atributos = [];
+  attributesContainer.querySelectorAll('.attribute-group').forEach(group => {
+    const attributeName = group.querySelector('.attribute-name-input').value.trim();
+    const attributeValue = group.querySelector('.attribute-value-input').value.trim();
+    if (attributeName && attributeValue) {
+      productData.atributos.push({ name: attributeName, value: attributeValue });
+    }
+  });
+
+  const productImagesInput = document.getElementById('product-images');
+  const files = productImagesInput.files;
+
+  try {
+    if (productId) {
+      // Atualizar produto existente
+      await db.collection('products').doc(productId).update(productData);
+      alert('Produto atualizado com sucesso!');
+    } else {
+      // Adicionar novo produto
+      productData.dataCadastro = firebase.firestore.FieldValue.serverTimestamp(); // Adiciona data de cadastro para novos
+      const docRef = await db.collection('products').add(productData);
+      alert('Produto cadastrado com sucesso!');
+
+      // Upload de imagens
+      if (files.length > 0) {
+        const imageUrls = [];
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const storageRef = storage.ref('product_images/' + docRef.id + '/' + file.name);
+          const uploadTask = storageRef.put(file);
+
+          await uploadTask;
+          const downloadURL = await storageRef.getDownloadURL();
+          imageUrls.push(downloadURL);
+        }
+        await docRef.update({ imageUrls: firebase.firestore.FieldValue.arrayUnion(...imageUrls) });
+      }
+    }
+    productForm.reset();
+    document.getElementById('dynamic-attributes-container').innerHTML = ''; // Limpa atributos
+    showSection('listar-produtos'); // Redireciona para a lista de produtos
+    await loadProductsToList(); // Recarrega a lista
+  } catch (error) {
+    console.error("Erro ao salvar produto: ", error);
+    alert("Ocorreu um erro ao salvar o produto.");
+  }
+}
+
+// Funções para atributos dinâmicos
+function addAttributeField() {
+  const container = document.getElementById('dynamic-attributes-container');
+  const attributeGroup = document.createElement('div');
+  attributeGroup.classList.add('row', 'mb-2', 'attribute-group');
+  attributeGroup.innerHTML = `
+    <div class="col-5">
+      <input type="text" class="form-control attribute-name-input" placeholder="Nome do Atributo">
+    </div>
+    <div class="col-5">
+      <input type="text" class="form-control attribute-value-input" placeholder="Valor do Atributo">
+    </div>
+    <div class="col-2">
+      <button type="button" class="btn btn-danger btn-sm" onclick="removeAttributeField(this)">Remover</button>
+    </div>
+  `;
+  container.appendChild(attributeGroup);
+}
+
+function removeAttributeField(button) {
+  button.closest('.attribute-group').remove();
+}
+
+// Funções para listar produtos
+async function loadProductsToList() {
   const productsTableBody = document.getElementById('products-table-body');
-  if (!productsTableBody) return;
-  productsTableBody.innerHTML = ''; // Clear existing rows
+  productsTableBody.innerHTML = ''; // Limpa a tabela
+
   try {
-    const snapshot = await db.collection('products').get();
-    let index = 1;
-    snapshot.forEach(doc => {
+    const productsSnapshot = await db.collection('products').get();
+    productsSnapshot.forEach(doc => {
       const product = doc.data();
       const row = productsTableBody.insertRow();
-      row.insertCell(0).textContent = index++;
-      row.insertCell(1).textContent = product.name;
-      row.insertCell(2).textContent = product.typeName || 'N/A'; // Usa o nome do tipo
-      row.insertCell(3).textContent = product.supplierName || 'N/A'; // Usa o nome do fornecedor
-      row.insertCell(4).textContent = product.quantity;
-      row.insertCell(5).textContent = product.purchasePrice.toFixed(2);
-      row.insertCell(6).textContent = product.salePrice.toFixed(2);
+
+      row.insertCell(0).textContent = product.nome;
+      row.insertCell(1).textContent = product.tipo || 'N/A';
+      row.insertCell(2).textContent = product.status;
+      row.insertCell(3).textContent = product.online ? 'Sim' : 'Não';
+      row.insertCell(4).textContent = product.restrito ? 'Sim' : 'Não';
+      row.insertCell(5).textContent = product.fornecedor || 'N/A';
+      row.insertCell(6).textContent = product.descricaoResumida || 'Sem descrição';
 
       const actionsCell = row.insertCell(7);
       actionsCell.innerHTML = `
-                <button class="btn btn-sm btn-info me-2" onclick="editProduct('${doc.id}')" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteProduct('${doc.id}')" data-bs-toggle="tooltip" data-bs-placement="top" title="Excluir">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-            `;
-    });
-    // Initialize tooltips for newly added buttons
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
+        <button class="btn btn-info btn-sm me-2" onclick="editProduct('${doc.id}')">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${doc.id}')">Excluir</button>
+      `;
     });
   } catch (error) {
-    console.error("Erro ao carregar produtos:", error);
+    console.error("Erro ao carregar produtos: ", error);
+    alert("Ocorreu um erro ao carregar os produtos.");
   }
 }
 
-// Delete Product
+// Funções de edição e exclusão de produtos
+async function editProduct(productId) {
+  try {
+    const doc = await db.collection('products').doc(productId).get();
+    if (doc.exists) {
+      const product = doc.data();
+      const productForm = document.getElementById('product-form');
+
+      // Preenche o formulário
+      productForm.dataset.productId = doc.id; // Salva o ID para atualização
+      productForm.querySelector('#product-type').value = product.tipo || '';
+      productForm.querySelector('#product-name').value = product.nome;
+      productForm.querySelector('#product-description-detailed').value = product.descricaoDetalhada || '';
+      productForm.querySelector('#product-description-short').value = product.descricaoResumida || '';
+      productForm.querySelector(`input[name="product-status"][value="${product.status}"]`).checked = true;
+      productForm.querySelector('#product-online').checked = product.online || false;
+      productForm.querySelector('#product-restricted').checked = product.restrito || false;
+      productForm.querySelector('#supplier').value = product.fornecedor || '';
+
+      // Preenche atributos dinâmicos
+      const attributesContainer = document.getElementById('dynamic-attributes-container');
+      attributesContainer.innerHTML = ''; // Limpa antes de preencher
+      if (product.atributos && product.atributos.length > 0) {
+        product.atributos.forEach(attr => {
+          const attributeGroup = document.createElement('div');
+          attributeGroup.classList.add('row', 'mb-2', 'attribute-group');
+          attributeGroup.innerHTML = `
+            <div class="col-5">
+              <input type="text" class="form-control attribute-name-input" placeholder="Nome do Atributo" value="${attr.name}">
+            </div>
+            <div class="col-5">
+              <input type="text" class="form-control attribute-value-input" placeholder="Valor do Atributo" value="${attr.value}">
+            </div>
+            <div class="col-2">
+              <button type="button" class="btn btn-danger btn-sm" onclick="removeAttributeField(this)">Remover</button>
+            </div>
+          `;
+          attributesContainer.appendChild(attributeGroup);
+        });
+      }
+
+      // Mostra a seção de cadastro para edição
+      showSection('cadastro-produtos');
+      alert('Produto carregado para edição.');
+    } else {
+      alert('Produto não encontrado.');
+    }
+  } catch (error) {
+    console.error("Erro ao carregar produto para edição: ", error);
+    alert("Ocorreu um erro ao carregar o produto para edição.");
+  }
+}
+
 async function deleteProduct(productId) {
   if (confirm('Tem certeza que deseja excluir este produto?')) {
     try {
       await db.collection('products').doc(productId).delete();
       alert('Produto excluído com sucesso!');
-      loadProducts(); // Recarregar a lista
+      await loadProductsToList(); // Recarrega a lista
     } catch (error) {
-      console.error("Erro ao excluir produto:", error);
-      alert('Erro ao excluir produto. Tente novamente.');
+      console.error("Erro ao excluir produto: ", error);
+      alert("Ocorreu um erro ao excluir o produto.");
     }
   }
 }
 
-// Edit Product (Placeholder - requires a modal or separate form)
-async function editProduct(productId) {
-  alert('Funcionalidade de edição de produto ainda não implementada. ID: ' + productId);
-  // Implementar modal ou redirecionamento para edição
-}
-
-// Delete Supplier
-async function deleteSupplier(supplierId) {
-  if (confirm('Tem certeza que deseja excluir este fornecedor?')) {
-    try {
-      await db.collection('suppliers').doc(supplierId).delete();
-      alert('Fornecedor excluído com sucesso!');
-      loadSuppliersTable(); // Recarregar a lista
-      loadSuppliers(); // Recarregar o dropdown
-    } catch (error) {
-      console.error("Erro ao excluir fornecedor:", error);
-      alert('Erro ao excluir fornecedor. Tente novamente.');
-    }
-  }
-}
-
-// Edit Supplier (Placeholder - requires a modal or separate form)
-async function editSupplier(supplierId) {
-  alert('Funcionalidade de edição de fornecedor ainda não implementada. ID: ' + supplierId);
-  // Implementar modal ou redirecionamento para edição
-}
-
-
-// Filter Products
-function filterProducts() {
-  const input = document.getElementById('search-product');
-  const filter = input.value.toLowerCase();
-  const table = document.getElementById('products-table-body');
-  const tr = table.getElementsByTagName('tr');
-
-  for (let i = 0; i < tr.length; i++) {
-    const tdName = tr[i].getElementsByTagName('td')[1]; // Coluna Nome
-    const tdType = tr[i].getElementsByTagName('td')[2]; // Coluna Tipo
-    const tdSupplier = tr[i].getElementsByTagName('td')[3]; // Coluna Fornecedor
-
-    if (tdName || tdType || tdSupplier) {
-      if ((tdName && tdName.textContent.toLowerCase().indexOf(filter) > -1) ||
-        (tdType && tdType.textContent.toLowerCase().indexOf(filter) > -1) ||
-        (tdSupplier && tdSupplier.textContent.toLowerCase().indexOf(filter) > -1)) {
-        tr[i].style.display = "";
-      } else {
-        tr[i].style.display = "none";
-      }
-    }
-  }
-}
-
-// Filter Suppliers
-function filterSuppliers() {
-  const input = document.getElementById('search-supplier');
-  const filter = input.value.toLowerCase();
-  const table = document.getElementById('suppliers-table-body');
-  const tr = table.getElementsByTagName('tr');
-
-  for (let i = 0; i < tr.length; i++) {
-    const tdName = tr[i].getElementsByTagName('td')[1]; // Coluna Nome do Fornecedor
-    const tdContact = tr[i].getElementsByTagName('td')[2]; // Coluna Contato
-    const tdEmail = tr[i].getElementsByTagName('td')[4]; // Coluna Email
-
-    if (tdName || tdContact || tdEmail) {
-      if ((tdName && tdName.textContent.toLowerCase().indexOf(filter) > -1) ||
-        (tdContact && tdContact.textContent.toLowerCase().indexOf(filter) > -1) ||
-        (tdEmail && tdEmail.textContent.toLowerCase().indexOf(filter) > -1)) {
-        tr[i].style.display = "";
-      } else {
-        tr[i].style.display = "none";
-      }
-    }
-  }
-}
-
-// Report Generation (Product)
-async function generateProductReport() {
+// Geração de PDF de Produtos
+async function generateProductsPdf() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
@@ -454,18 +537,19 @@ async function generateProductReport() {
       products.push(doc.data());
     });
 
-    const tableColumn = ["#", "Nome", "Tipo", "Fornecedor", "Quantidade", "Preço Compra (R$)", "Preço Venda (R$)"];
+    const tableColumn = ["#", "Tipo", "Nome", "Descrição Resumida", "Status", "Online", "Restrito", "Fornecedor"];
     const tableRows = [];
 
     products.forEach((product, index) => {
       const productData = [
         index + 1,
-        product.name,
-        product.typeName || 'N/A',
-        product.supplierName || 'N/A',
-        product.quantity,
-        product.purchasePrice.toFixed(2),
-        product.salePrice.toFixed(2)
+        product.tipo || 'N/A',
+        product.nome,
+        product.descricaoResumida || 'Sem descrição',
+        product.status || 'N/A',
+        product.online ? 'Sim' : 'Não',
+        product.restrito ? 'Sim' : 'Não',
+        product.fornecedor || 'N/A'
       ];
       tableRows.push(productData);
     });
@@ -485,81 +569,186 @@ async function generateProductReport() {
       },
       margin: { top: 10, left: 10, right: 10, bottom: 10 },
       didDrawPage: function (data) {
-        // Footer
         let str = "Página " + doc.internal.getNumberOfPages();
-        doc.setFontSize(8);
+        doc.setFontSize(10);
         doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
       }
     });
 
-    doc.save('relatorio_produtos.pdf');
+    doc.save('produtos_cannapis.pdf');
   } catch (error) {
-    console.error("Erro ao gerar relatório de produtos:", error);
-    alert('Erro ao gerar relatório de produtos. Verifique o console para mais detalhes.');
+    console.error("Erro ao gerar PDF de produtos: ", error);
+    alert("Ocorreu um erro ao gerar o PDF de produtos.");
   }
 }
 
-// Report Generation (Supplier)
-async function generateSupplierReport() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+// Funções para cadastro de associados (atualizadas com os novos campos)
+async function handleAssociateFormSubmit(event) {
+  event.preventDefault();
 
-  doc.setFontSize(16);
-  doc.text("Relatório de Fornecedores", 10, 10);
+  const associateForm = event.target;
+  const associateId = associateForm.dataset.associateId; // Para edição
 
-  const suppliers = [];
+  const associateData = {
+    nomeCompleto: associateForm.querySelector('#associate-full-name').value.trim(),
+    dataNascimento: associateForm.querySelector('#associate-dob').value,
+    genero: associateForm.querySelector('input[name="associate-gender"]:checked').value,
+    rg: associateForm.querySelector('#associate-rg').value.trim(),
+    cpf: associateForm.querySelector('#associate-cpf').value.trim(),
+    endereco: associateForm.querySelector('#associate-address').value.trim(),
+    cep: associateForm.querySelector('#associate-cep').value.trim(),
+    telefone: associateForm.querySelector('#associate-phone').value.trim(),
+    email: associateForm.querySelector('#associate-email').value.trim(),
+    tipoAssociado: associateForm.querySelector('#associate-type').value,
+    dataAssociacao: associateForm.querySelector('#associate-association-date').value,
+    statusAssociado: associateForm.querySelector('input[name="associate-status"]:checked').value,
+    // Novos campos
+    condicoesMedicas: associateForm.querySelector('#associate-medical-conditions').value.trim(),
+    recebeTratamentoMedico: associateForm.querySelector('#associate-medical-treatment').checked,
+    experienciaCultivo: associateForm.querySelector('#associate-cultivation-experience').value.trim(),
+    metodologiaCultivo: associateForm.querySelector('#associate-cultivation-method').value.trim(),
+    observacoesAdicionais: associateForm.querySelector('#associate-observations').value.trim(),
+  };
+
   try {
-    const suppliersSnapshot = await db.collection('suppliers').get();
-    suppliersSnapshot.forEach(doc => {
-      suppliers.push(doc.data());
-    });
+    if (associateId) {
+      // Atualizar associado existente (não atualiza dataCadastro)
+      await db.collection('associates').doc(associateId).update(associateData);
+      alert('Associado atualizado com sucesso!');
+    } else {
+      // Adicionar novo associado
+      associateData.dataCadastro = firebase.firestore.FieldValue.serverTimestamp(); // Adiciona data de cadastro
+      await db.collection('associates').add(associateData);
+      alert('Associado cadastrado com sucesso!');
+    }
+    associateForm.reset(); // Limpa o formulário
 
-    const tableColumn = ["#", "Nome do Fornecedor", "Contato", "Telefone", "Email", "Endereço"];
-    const tableRows = [];
+    // Redireciona para a lista correta após salvar
+    const status = associateData.statusAssociado.toLowerCase();
+    if (status === 'ativo') {
+      showSection('admitidos');
+      await loadAssociatesFilteredToList('ativo', 'associates-admitidos-table-body');
+    } else if (status === 'em admissão') {
+      showSection('em-admissao');
+      await loadAssociatesFilteredToList('Em Admissão', 'associates-em-admissao-table-body');
+    } else {
+      // Se for outro status, ou para garantir, recarrega a lista principal ou a de admitidos
+      showSection('admitidos');
+      await loadAssociatesFilteredToList('ativo', 'associates-admitidos-table-body');
+    }
 
-    suppliers.forEach((supplier, index) => {
-      const supplierData = [
-        index + 1,
-        supplier.name,
-        supplier.contactPerson || 'N/A',
-        supplier.phone || 'N/A',
-        supplier.email || 'N/A',
-        supplier.address || 'N/A'
-      ];
-      tableRows.push(supplierData);
-    });
-
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-      headStyles: { fillColor: [50, 50, 50] },
-      styles: {
-        fontSize: 8,
-        cellPadding: 3,
-        textColor: [0, 0, 0]
-      },
-      alternateRowStyles: {
-        fillColor: [240, 240, 240]
-      },
-      margin: { top: 10, left: 10, right: 10, bottom: 10 },
-      didDrawPage: function (data) {
-        // Footer
-        let str = "Página " + doc.internal.getNumberOfPages();
-        doc.setFontSize(8);
-        doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
-      }
-    });
-
-    doc.save('relatorio_fornecedores.pdf');
   } catch (error) {
-    console.error("Erro ao gerar relatório de fornecedores:", error);
-    alert('Erro ao gerar relatório de fornecedores. Verifique o console para mais detalhes.');
+    console.error("Erro ao salvar associado: ", error);
+    alert("Ocorreu um erro ao salvar o associado.");
   }
 }
 
-// Report Generation (Associate)
-async function generateAssociateReport() {
+// Funções para listar associados (AGORA COM FILTRO)
+async function loadAssociatesFilteredToList(statusFilter = null, tableBodyId = 'associates-admitidos-table-body') {
+  const associatesTableBody = document.getElementById(tableBodyId);
+  if (!associatesTableBody) {
+    console.error(`Tabela com ID ${tableBodyId} não encontrada.`);
+    return;
+  }
+  associatesTableBody.innerHTML = ''; // Limpa a tabela
+
+  try {
+    let query = db.collection('associates');
+    if (statusFilter) {
+      query = query.where('statusAssociado', '==', statusFilter);
+    }
+
+    const associatesSnapshot = await query.get();
+    if (associatesSnapshot.empty) {
+      associatesTableBody.innerHTML = `<tr><td colspan="6" class="text-center">Nenhum associado com status "${statusFilter || 'qualquer'}" encontrado.</td></tr>`;
+      return;
+    }
+
+    associatesSnapshot.forEach(doc => {
+      const associate = doc.data();
+      const row = associatesTableBody.insertRow();
+
+      row.insertCell(0).textContent = associate.nomeCompleto;
+      row.insertCell(1).textContent = associate.cpf;
+      row.insertCell(2).textContent = associate.telefone;
+      row.insertCell(3).textContent = associate.tipoAssociado || 'N/A';
+      row.insertCell(4).textContent = associate.statusAssociado;
+
+      const actionsCell = row.insertCell(5);
+      actionsCell.innerHTML = `
+        <button class="btn btn-info btn-sm me-2" onclick="editAssociate('${doc.id}')">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAssociate('${doc.id}')">Excluir</button>
+      `;
+    });
+  } catch (error) {
+    console.error("Erro ao carregar associados: ", error);
+    alert("Ocorreu um erro ao carregar os associados.");
+  }
+}
+
+
+// Funções de edição e exclusão de associados (atualizadas com os novos campos)
+async function editAssociate(associateId) {
+  try {
+    const doc = await db.collection('associates').doc(associateId).get();
+    if (doc.exists) {
+      const associate = doc.data();
+      const associateForm = document.getElementById('associate-form');
+
+      // Preenche o formulário
+      associateForm.dataset.associateId = doc.id;
+      associateForm.querySelector('#associate-full-name').value = associate.nomeCompleto || '';
+      associateForm.querySelector('#associate-dob').value = associate.dataNascimento || '';
+      const genderRadio = associateForm.querySelector(`input[name="associate-gender"][value="${associate.genero}"]`);
+      if (genderRadio) genderRadio.checked = true;
+      associateForm.querySelector('#associate-rg').value = associate.rg || '';
+      associateForm.querySelector('#associate-cpf').value = associate.cpf || '';
+      associateForm.querySelector('#associate-address').value = associate.endereco || '';
+      associateForm.querySelector('#associate-cep').value = associate.cep || '';
+      associateForm.querySelector('#associate-phone').value = associate.telefone || '';
+      associateForm.querySelector('#associate-email').value = associate.email || '';
+      associateForm.querySelector('#associate-type').value = associate.tipoAssociado || '';
+      associateForm.querySelector('#associate-association-date').value = associate.dataAssociacao || '';
+      const statusRadio = associateForm.querySelector(`input[name="associate-status"][value="${associate.statusAssociado}"]`);
+      if (statusRadio) statusRadio.checked = true;
+
+      // Novos campos
+      associateForm.querySelector('#associate-medical-conditions').value = associate.condicoesMedicas || '';
+      associateForm.querySelector('#associate-medical-treatment').checked = associate.recebeTratamentoMedico || false;
+      associateForm.querySelector('#associate-cultivation-experience').value = associate.experienciaCultivo || '';
+      associateForm.querySelector('#associate-cultivation-method').value = associate.metodologiaCultivo || '';
+      associateForm.querySelector('#associate-observations').value = associate.observacoesAdicionais || '';
+
+      showSection('cadastro-associados');
+      alert('Associado carregado para edição.');
+    } else {
+      alert('Associado não encontrado.');
+    }
+  } catch (error) {
+    console.error("Erro ao carregar associado para edição: ", error);
+    alert("Ocorreu um erro ao carregar o associado para edição.");
+  }
+}
+
+async function deleteAssociate(associateId) {
+  if (confirm('Tem certeza que deseja excluir este associado?')) {
+    try {
+      await db.collection('associates').doc(associateId).delete();
+      alert('Associado excluído com sucesso!');
+      // Após a exclusão, recarrega a lista de associados admitidos (ou a seção ativa atual)
+      // Para ser mais robusto, recarrega ambas, se estiverem abertas
+      await loadAssociatesFilteredToList('ativo', 'associates-admitidos-table-body');
+      await loadAssociatesFilteredToList('Em Admissão', 'associates-em-admissao-table-body');
+      // showSection('admitidos'); // Opcional: redireciona para a lista de admitidos após excluir
+    } catch (error) {
+      console.error("Erro ao excluir associado: ", error);
+      alert("Ocorreu um erro ao excluir o associado.");
+    }
+  }
+}
+
+// Geração de PDF de Associados (sem alterações significativas aqui, apenas se precisar incluir os novos campos)
+async function generateAssociatesPdf() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
@@ -603,219 +792,15 @@ async function generateAssociateReport() {
       },
       margin: { top: 10, left: 10, right: 10, bottom: 10 },
       didDrawPage: function (data) {
-        // Footer
         let str = "Página " + doc.internal.getNumberOfPages();
-        doc.setFontSize(8);
+        doc.setFontSize(10);
         doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
       }
     });
 
-    doc.save('relatorio_associados.pdf');
+    doc.save('associados_cannapis.pdf');
   } catch (error) {
-    console.error("Erro ao gerar relatório de associados:", error);
-    alert('Erro ao gerar relatório de associados. Verifique o console para mais detalhes.');
+    console.error("Erro ao gerar PDF de associados: ", error);
+    alert("Ocorreu um erro ao gerar o PDF de associados.");
   }
-}
-
-// NEW FUNCTIONS FOR ASSOCIATES
-
-// Load Associate Types for dropdown
-async function loadAssociateTypes() {
-    const associateTypeSelect = document.getElementById('associate-type');
-    if (!associateTypeSelect) return;
-    associateTypeSelect.innerHTML = '<option value="">Selecione um tipo</option>';
-    try {
-        const snapshot = await db.collection('associateTypes').get();
-        snapshot.forEach(doc => {
-            const option = document.createElement('option');
-            option.value = doc.id;
-            option.textContent = doc.data().name;
-            associateTypeSelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Erro ao carregar tipos de associado:", error);
-    }
-}
-
-// Add Associate Type from modal
-async function addAssociateType() {
-    const newAssociateTypeName = document.getElementById('new-associate-type-name').value;
-    if (newAssociateTypeName.trim() === '') {
-        alert('Por favor, insira um nome para o tipo de associado.');
-        return;
-    }
-    try {
-        await db.collection('associateTypes').add({ name: newAssociateTypeName });
-        alert('Tipo de associado adicionado com sucesso!');
-        document.getElementById('new-associate-type-name').value = '';
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addAssociateTypeModal'));
-        modal.hide();
-        loadAssociateTypes(); // Recarrega os tipos de associado no dropdown
-    } catch (error) {
-        console.error("Erro ao adicionar tipo de associado:", error);
-        alert('Erro ao adicionar tipo de associado. Tente novamente.');
-    }
-}
-
-// Register Associate
-async function registerAssociate(e) {
-    e.preventDefault();
-
-    const fullName = document.getElementById('associate-full-name').value;
-    const cpf = document.getElementById('associate-cpf').value;
-    const phone = document.getElementById('associate-phone').value;
-    const dob = document.getElementById('associate-dob').value;
-    const address = document.getElementById('associate-address').value;
-    const number = document.getElementById('associate-number').value;
-    const cep = document.getElementById('associate-cep').value;
-    const city = document.getElementById('associate-city').value;
-    const state = document.getElementById('associate-state').value;
-    const country = document.getElementById('associate-country').value;
-    const email = document.getElementById('associate-email').value;
-    const associateTypeId = document.getElementById('associate-type').value;
-    const associateStatus = document.getElementById('associate-status').value;
-    const documentFile = document.getElementById('associate-document-upload').files[0]; // Get the file
-
-    if (!fullName || !cpf || !associateTypeId || !associateStatus) {
-        alert('Por favor, preencha os campos obrigatórios: Nome Completo, CPF, Tipo de Associado e Status.');
-        return;
-    }
-
-    try {
-        // Buscar o nome do tipo de associado
-        const associateTypeDoc = await db.collection('associateTypes').doc(associateTypeId).get();
-        const associateTypeName = associateTypeDoc.exists ? associateTypeDoc.data().name : 'N/A';
-
-        let documentUrl = '';
-        if (documentFile) {
-            const storageRef = storage.ref();
-            const documentName = `${Date.now()}_${documentFile.name}`;
-            const fileRef = storageRef.child(`associate_documents/${documentName}`);
-            await fileRef.put(documentFile);
-            documentUrl = await fileRef.getDownloadURL();
-            console.log('Documento carregado:', documentUrl);
-        }
-
-        await db.collection('associates').add({
-            nomeCompleto: fullName,
-            cpf: cpf,
-            telefone: phone,
-            dataNascimento: dob,
-            enderecoCompleto: address,
-            numeroEndereco: number,
-            cep: cep,
-            cidade: city,
-            estado: state,
-            pais: country,
-            email: email,
-            tipoAssociadoId: associateTypeId,
-            tipoAssociado: associateTypeName, // Armazena o nome para facilitar consultas
-            statusAssociado: associateStatus,
-            documentoUrl: documentUrl, // Armazena a URL do documento
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        alert('Associado cadastrado com sucesso!');
-        document.getElementById('register-associate-form').reset();
-        document.getElementById('uploaded-documents-preview').innerHTML = ''; // Clear preview
-        loadAssociates(); // Recarrega a lista de associados
-    } catch (error) {
-        console.error("Erro ao cadastrar associado:", error);
-        alert('Erro ao cadastrar associado. Tente novamente.');
-    }
-}
-
-// Load Associates for table
-async function loadAssociates() {
-  const associatesTableBody = document.getElementById('associates-table-body');
-  if (!associatesTableBody) return;
-  associatesTableBody.innerHTML = ''; // Clear existing rows
-  try {
-    const snapshot = await db.collection('associates').get();
-    let index = 1;
-    snapshot.forEach(doc => {
-      const associate = doc.data();
-      const row = associatesTableBody.insertRow();
-      row.insertCell(0).textContent = index++;
-      row.insertCell(1).textContent = associate.nomeCompleto;
-      row.insertCell(2).textContent = associate.cpf;
-      row.insertCell(3).textContent = associate.telefone || 'N/A';
-      row.insertCell(4).textContent = associate.tipoAssociado || 'N/A'; // Usa o nome do tipo
-      row.insertCell(5).textContent = associate.statusAssociado;
-
-      const actionsCell = row.insertCell(6);
-      actionsCell.innerHTML = `
-                <button class="btn btn-sm btn-info me-2" onclick="editAssociate('${doc.id}')" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteAssociate('${doc.id}')" data-bs-toggle="tooltip" data-bs-placement="top" title="Excluir">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-                ${associate.documentoUrl ? `<a href="${associate.documentoUrl}" target="_blank" class="btn btn-sm btn-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Ver Documento"><i class="fas fa-eye"></i></a>` : ''}
-            `;
-    });
-    // Initialize tooltips for newly added buttons
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
-  } catch (error) {
-    console.error("Erro ao carregar associados:", error);
-  }
-}
-
-// Delete Associate
-async function deleteAssociate(associateId) {
-    if (confirm('Tem certeza que deseja excluir este associado?')) {
-        try {
-            // Opcional: Excluir o documento associado do Storage, se existir
-            const associateDoc = await db.collection('associates').doc(associateId).get();
-            const associateData = associateDoc.data();
-            if (associateData && associateData.documentoUrl) {
-                const fileRef = storage.refFromURL(associateData.documentoUrl);
-                await fileRef.delete().catch(error => {
-                    console.warn("Aviso: Não foi possível excluir o arquivo do Storage (pode já ter sido excluído ou URL inválida).", error);
-                });
-            }
-
-            await db.collection('associates').doc(associateId).delete();
-            alert('Associado excluído com sucesso!');
-            loadAssociates(); // Recarregar a lista
-        } catch (error) {
-            console.error("Erro ao excluir associado:", error);
-            alert('Erro ao excluir associado. Tente novamente.');
-        }
-    }
-}
-
-// Edit Associate (Placeholder - requires a modal or separate form)
-async function editAssociate(associateId) {
-  alert('Funcionalidade de edição de associado ainda não implementada. ID: ' + associateId);
-  // Implementar modal ou redirecionamento para edição
-}
-
-// Filter Associates
-function filterAssociates() {
-    const input = document.getElementById('search-associate');
-    const filter = input.value.toLowerCase();
-    const table = document.getElementById('associates-table-body');
-    const tr = table.getElementsByTagName('tr');
-
-    for (let i = 0; i < tr.length; i++) {
-        const tdName = tr[i].getElementsByTagName('td')[1]; // Coluna Nome Completo
-        const tdCpf = tr[i].getElementsByTagName('td')[2];  // Coluna CPF
-        const tdType = tr[i].getElementsByTagName('td')[4]; // Coluna Tipo de Associado
-        const tdStatus = tr[i].getElementsByTagName('td')[5]; // Coluna Status
-
-        if (tdName || tdCpf || tdType || tdStatus) {
-            if ((tdName && tdName.textContent.toLowerCase().indexOf(filter) > -1) ||
-                (tdCpf && tdCpf.textContent.toLowerCase().indexOf(filter) > -1) ||
-                (tdType && tdType.textContent.toLowerCase().indexOf(filter) > -1) ||
-                (tdStatus && tdStatus.textContent.toLowerCase().indexOf(filter) > -1)) {
-                tr[i].style.display = "";
-            } else {
-                tr[i].style.display = "none";
-            }
-        }
-    }
 }
