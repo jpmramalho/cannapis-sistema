@@ -1,7 +1,10 @@
 // A constante `db` (firebase.firestore()) é inicializada no dashboard.html, antes deste script.
 
+// ALTERAÇÃO 1: Variável para armazenar a última seção ativa
+let lastActiveSection = 'home'; // Valor padrão
+
 // Autenticação simples
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () { // Adicionado 'async'
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
     loginForm.addEventListener('submit', function (e) {
@@ -18,6 +21,18 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // Carregar tipos de produto para o SELECT
+  await loadProductTypes(); // Garante que os tipos estejam carregados antes de mostrar a seção
+
+  // ALTERAÇÃO 1: Restaurar a última seção ativa ao carregar o dashboard
+  if (document.getElementById('dashboard-container')) {
+    const storedSection = localStorage.getItem('lastActiveSection');
+    if (storedSection) {
+      lastActiveSection = storedSection;
+    }
+    await showSection(lastActiveSection); // Chama showSection que agora é async
+  }
+
   // Adicionar um event listener para o submit do formulário de produto
   const productForm = document.getElementById('product-registration-form');
   if (productForm) {
@@ -27,19 +42,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Fechar o modal clicando fora dele
-  const modal = document.getElementById('product-type-modal');
-  if (modal) {
+  // Fechar o modal clicando fora dele (para o novo modal de tipo de produto)
+  const newProductTypeModal = document.getElementById('new-product-type-modal');
+  if (newProductTypeModal) {
     window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
+      if (event.target == newProductTypeModal) {
+        newProductTypeModal.style.display = "none";
       }
     }
   }
-
-  // NOTA: renderProductList() será chamada por showSection('consulta')
-  // ou você pode chamá-la aqui se quiser que a lista apareça na Home, por exemplo,
-  // mas como o dashboard começa na Home, não é estritamente necessário.
 });
 
 // Alternar submenu de Produtos
@@ -50,6 +61,10 @@ function toggleSubmenu() {
 
 // Mostrar seção selecionada
 async function showSection(sectionId) { // Adicione 'async' aqui
+  // ALTERAÇÃO 1: Salvar a seção atual no localStorage
+  localStorage.setItem('lastActiveSection', sectionId);
+  lastActiveSection = sectionId; // Atualiza a variável global
+
   // Atualiza título
   document.getElementById('section-title').textContent =
     sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
@@ -91,39 +106,83 @@ async function showSection(sectionId) { // Adicione 'async' aqui
 // Logout
 function logout() {
   alert('Você saiu do sistema.');
+  localStorage.removeItem('lastActiveSection'); // Limpa a seção salva ao sair
   window.location.href = 'index.html';
 }
 
-// Funções para o Modal de Tipo de Produto
-function openProductTypeModal() {
-  document.getElementById('product-type-modal').style.display = 'block';
+// ALTERAÇÃO 2: Funções para o NOVO Modal de Tipo de Produto
+function openNewProductTypeModal() {
+  document.getElementById('new-product-type-modal').style.display = 'block';
+  document.getElementById('new-product-type-input').value = ''; // Limpa o campo
 }
 
-function closeProductTypeModal() {
-  document.getElementById('product-type-modal').style.display = 'none';
+function closeNewProductTypeModal() {
+  document.getElementById('new-product-type-modal').style.display = 'none';
 }
 
-function saveNewProductType() {
-  const newTypeInput = document.getElementById('new-product-type');
+// ALTERAÇÃO 2: Salva um novo tipo de produto no Firestore
+async function saveNewProductTypeToFirestore() {
+  const newTypeInput = document.getElementById('new-product-type-input');
   const newType = newTypeInput.value.trim();
 
-  if (newType) {
-    alert(`Tipo de Produto "${newType}" salvo (Neste exemplo, isso apenas preenche o campo. Para persistir tipos, você precisaria de uma coleção separada no Firestore para tipos).`);
-    document.getElementById('product-type').value = newType;
-    closeProductTypeModal();
-    newTypeInput.value = '';
-  } else {
+  if (!newType) {
     alert('Por favor, insira um nome para o novo tipo de produto.');
+    return;
+  }
+
+  try {
+    // Verifica se o tipo já existe para evitar duplicatas (case-insensitive)
+    const existingTypes = await db.collection('productTypes').where('name', '==', newType).get();
+    if (!existingTypes.empty) {
+        alert(`O tipo de produto "${newType}" já existe.`);
+        return;
+    }
+
+    await db.collection('productTypes').add({
+      name: newType,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp() // Opcional: timestamp de criação
+    });
+    alert(`Tipo de Produto "${newType}" salvo com sucesso!`);
+    await loadProductTypes(); // Recarrega o SELECT com o novo tipo
+    closeNewProductTypeModal();
+  } catch (error) {
+    console.error("Erro ao salvar novo tipo de produto: ", error);
+    alert("Ocorreu um erro ao salvar o tipo de produto. Verifique o console.");
+  }
+}
+
+// ALTERAÇÃO 2: Carrega os tipos de produto do Firestore e preenche o SELECT
+async function loadProductTypes() {
+  const productTypeSelect = document.getElementById('product-type');
+  productTypeSelect.innerHTML = '<option value="">Selecione ou Cadastre</option>'; // Resetar opções
+
+  try {
+    const typesSnapshot = await db.collection('productTypes').orderBy('name').get();
+    typesSnapshot.forEach(doc => {
+      const type = doc.data();
+      const option = document.createElement('option');
+      option.value = type.name;
+      option.textContent = type.name;
+      productTypeSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error("Erro ao carregar tipos de produto: ", error);
+    alert("Ocorreu um erro ao carregar os tipos de produto.");
   }
 }
 
 // Funções para os botões do formulário de produto (AGORA INTERAGEM COM FIRESTORE)
-async function saveProduct() { // Adicione 'async' aqui
+async function saveProduct() {
   const productType = document.getElementById('product-type').value.trim();
   const productName = document.getElementById('product-name').value.trim();
   const productDescription = document.getElementById('product-description').value.trim();
   const productPrice = parseFloat(document.getElementById('product-price').value);
 
+  // ALTERAÇÃO 3: Validação de campo vazio para Tipo e Preço
+  if (!productType) {
+      alert('Por favor, selecione um Tipo de Produto.');
+      return;
+  }
   if (!productName) {
     alert('Nome do Produto é obrigatório!');
     return;
@@ -162,7 +221,7 @@ async function saveProduct() { // Adicione 'async' aqui
 
     // Limpa o formulário após salvar/atualizar
     form.reset();
-    document.getElementById('product-type').value = '';
+    document.getElementById('product-type').value = ''; // Limpa o select
 
     await renderProductList(); // Atualiza a lista na tela após a operação no DB
   } catch (error) {
@@ -172,7 +231,7 @@ async function saveProduct() { // Adicione 'async' aqui
 }
 
 // Renderiza a lista de produtos na tabela (AGORA BUSCA DO FIRESTORE)
-async function renderProductList() { // Adicione 'async' aqui
+async function renderProductList() {
   const productListBody = document.getElementById('product-list-body');
   const noProductsMessage = document.getElementById('no-products-message');
 
@@ -181,7 +240,8 @@ async function renderProductList() { // Adicione 'async' aqui
   productListBody.innerHTML = ''; // Limpa a tabela antes de renderizar
 
   try {
-    const productsCollection = await db.collection('products').orderBy('createdAt', 'desc').get(); // Busca ordenada
+    // Busca produtos ordenados por data de criação para ter uma "sequência"
+    const productsCollection = await db.collection('products').orderBy('createdAt', 'asc').get();
     const products = productsCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
     if (products.length === 0) {
@@ -191,8 +251,9 @@ async function renderProductList() { // Adicione 'async' aqui
       noProductsMessage.style.display = 'none';
     }
 
-    products.forEach(product => {
+    products.forEach((product, index) => { // ALTERAÇÃO 5: Adicionado 'index'
       const row = productListBody.insertRow();
+      row.insertCell().textContent = index + 1; // ALTERAÇÃO 5: Código sequencial para exibição
       row.insertCell().textContent = product.tipo || 'N/A';
       row.insertCell().textContent = product.nome;
       row.insertCell().textContent = product.descricao || 'Sem descrição';
@@ -219,13 +280,14 @@ async function renderProductList() { // Adicione 'async' aqui
   }
 }
 
-// Funções para editar e excluir da lista de consulta (AGORA INTERAGEM COM FIRESTORE)
-async function editProductFromList(productId) { // Adicione 'async' aqui
+// Funções para editar e excluir da lista de consulta
+async function editProductFromList(productId) {
   try {
     const productDoc = await db.collection('products').doc(productId).get();
     if (productDoc.exists) {
       const productToEdit = { id: productDoc.id, ...productDoc.data() };
       
+      // ALTERAÇÃO 2: Define o valor do SELECT
       document.getElementById('product-type').value = productToEdit.tipo || '';
       document.getElementById('product-name').value = productToEdit.nome || '';
       document.getElementById('product-description').value = productToEdit.descricao || '';
@@ -244,7 +306,7 @@ async function editProductFromList(productId) { // Adicione 'async' aqui
   }
 }
 
-async function deleteProductFromList(productId) { // Adicione 'async' aqui
+async function deleteProductFromList(productId) {
   if (confirm('Tem certeza que deseja excluir este produto do Firebase?')) {
     try {
       await db.collection('products').doc(productId).delete();
@@ -264,4 +326,62 @@ function editProduct() {
 
 function deleteProduct() {
   alert('Funcionalidade "Excluir" no formulário de cadastro: Para excluir um produto, selecione-o na lista de "Consulta" através do botão "Excluir" na linha do produto.');
+}
+
+// ALTERAÇÃO 4: Função para gerar o relatório PDF
+async function generateProductReportPDF() {
+  const { jsPDF } = window.jspdf; // Acessa jsPDF do objeto window
+  const doc = new jsPDF();
+
+  doc.text("Relatório de Produtos - Cannapis", 10, 10);
+
+  try {
+    const productsCollection = await db.collection('products').orderBy('createdAt', 'asc').get();
+    const products = productsCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    if (products.length === 0) {
+      alert("Não há produtos para gerar o relatório.");
+      return;
+    }
+
+    const tableColumn = ["Cód.", "Tipo", "Nome", "Descrição", "Preço"];
+    const tableRows = [];
+
+    products.forEach((product, index) => {
+      const productData = [
+        index + 1, // Código sequencial para o PDF
+        product.tipo || 'N/A',
+        product.nome,
+        product.descricao || 'Sem descrição',
+        `R$ ${String(product.preco).replace('.', ',')}`
+      ];
+      tableRows.push(productData);
+    });
+
+    // Adiciona a tabela ao PDF
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      headStyles: { fillColor: [50, 50, 50] },
+      styles: {
+        fontSize: 8,
+        cellPadding: 3
+      },
+      margin: { top: 10, left: 10, right: 10, bottom: 10 },
+      didDrawPage: function (data) {
+        // Footer com número da página
+        let str = "Página " + doc.internal.getNumberOfPages();
+        doc.setFontSize(8);
+        doc.text(str, data.settings.margin.left, doc.internal.pageSize.height - 10);
+      }
+    });
+
+    doc.save('relatorio_produtos_cannapis.pdf');
+    alert("Relatório PDF gerado com sucesso!");
+
+  } catch (error) {
+    console.error("Erro ao gerar relatório PDF: ", error);
+    alert("Ocorreu um erro ao gerar o relatório PDF. Verifique o console.");
+  }
 }

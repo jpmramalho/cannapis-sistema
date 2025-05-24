@@ -100,14 +100,17 @@ header h1 {
   font-weight: bold;
 }
 
+/* ALTERAÇÃO CSS: Input e Select agora têm estilos semelhantes */
 .product-form-container input[type="text"],
 .product-form-container input[type="number"],
-.product-form-container textarea {
+.product-form-container textarea,
+.product-form-container select { /* Adicionado 'select' */
   width: calc(100% - 22px); /* Ajusta para padding e borda */
   padding: 10px;
   margin-bottom: 15px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  box-sizing: border-box; /* Garante que padding e borda não aumentem a largura total */
 }
 
 .product-form-container textarea {
@@ -119,7 +122,8 @@ header h1 {
   margin-bottom: 15px;
 }
 
-.product-form-container .input-with-button input {
+.product-form-container .input-with-button input,
+.product-form-container .input-with-button select { /* Adicionado 'select' */
   flex-grow: 1;
   margin-bottom: 0; /* Remove margem padrão aqui */
 }
@@ -233,6 +237,7 @@ header h1 {
   margin-bottom: 15px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  box-sizing: border-box;
 }
 
 .modal-content button {
@@ -308,4 +313,20 @@ header h1 {
 
 .product-list-container .action-buttons .delete-btn:hover {
   background-color: #c82333;
+}
+
+/* ALTERAÇÃO CSS: Botão de gerar PDF */
+.generate-pdf-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 15px;
+}
+
+.generate-pdf-btn:hover {
+    background-color: #0056b3;
 }
